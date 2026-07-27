@@ -1,0 +1,186 @@
+// Flooy Photos - Prisma schema
+// Domain: Events, Photos, Orders, OrderItems + Better Auth tables (admin auth only)
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ----------------------------------------------------------------------------
+// Domain models
+// ----------------------------------------------------------------------------
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  COMPLETED
+  CANCELLED
+}
+
+model Event {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  location     String?
+  description  String?
+  date         DateTime?
+  // Default price (in pence) for photos in this event; individual photos may override.
+  defaultPrice Int      @default(1500)
+  published    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  photos Photo[]
+  orders Order[]
+
+  @@index([slug])
+  @@index([published])
+}
+
+model Photo {
+  id           String   @id @default(cuid())
+  eventId      String
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  filename     String
+  // Human-friendly sequential number shown to customers (e.g. photo number).
+  photoNumber  Int?
+  photographer String?
+
+  // Storage keys (R2 object keys, never exposed directly to customers)
+  previewKey   String   // events/<eventId>/previews/<file>
+  originalKey  String   // events/<eventId>/originals/<file>
+  // Public preview URL (watermarked + compressed). Safe to expose.
+  previewUrl   String
+
+  width        Int?
+  height       Int?
+  fileSize     Int?     // bytes (original)
+  // Price override in pence. Falls back to event.defaultPrice when null.
+  price        Int?
+
+  takenAt      DateTime?
+  createdAt    DateTime @default(now())
+
+  orderItems   OrderItem[]
+
+  @@index([eventId])
+  @@index([eventId, photoNumber])
+  @@index([filename])
+  @@index([photographer])
+  @@index([createdAt])
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  orderNumber   String      @unique // e.g. FLOOY-48372
+  eventId       String?
+  event         Event?      @relation(fields: [eventId], references: [id], onDelete: SetNull)
+
+  customerName  String
+  customerEmail String?
+  customerPhone String?
+
+  status        OrderStatus @default(PENDING_PAYMENT)
+  // Snapshot of total in pence at time of order.
+  totalAmount   Int         @default(0)
+
+  paidAt        DateTime?
+  completedAt   DateTime?
+  cancelledAt   DateTime?
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  items         OrderItem[]
+
+  @@index([orderNumber])
+  @@index([status])
+  @@index([customerEmail])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  order     Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  photoId   String
+  photo     Photo  @relation(fields: [photoId], references: [id], onDelete: Restrict)
+
+  // Price snapshot (pence) captured at checkout time.
+  unitPrice Int
+
+  createdAt DateTime @default(now())
+
+  @@unique([orderId, photoId])
+  @@index([orderId])
+  @@index([photoId])
+}
+
+// ----------------------------------------------------------------------------
+// Better Auth models (admin authentication only)
+// ----------------------------------------------------------------------------
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  role          String    @default("admin")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions Session[]
+  accounts Account[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
