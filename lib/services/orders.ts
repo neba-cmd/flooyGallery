@@ -1,8 +1,11 @@
 import { prisma } from "@/lib/db"
 import { generateOrderNumber } from "@/lib/order-number"
 import { serializeOrder, effectivePrice } from "@/lib/serialize"
+import { createDownloadUrl } from "@/lib/storage/r2"
 import type { OrderDTO } from "@/types"
 import type { OrderStatus } from "@/lib/generated/prisma/client"
+
+const DOWNLOAD_TTL_SECONDS = 300
 
 export type CreateOrderInput = {
   customerName: string
@@ -110,4 +113,30 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus): P
     include: { items: { include: { photo: true } }, event: true },
   })
   return serializeOrder(order)
+}
+
+/**
+ * Generate a short-lived signed URL for a purchased original.
+ *
+ * Only works when the order is paid/completed and the item belongs to that
+ * order. Originals are never exposed publicly — the customer only ever
+ * receives a temporary, expiring link.
+ */
+export async function getSignedDownloadUrl(orderNumber: string, itemId: string): Promise<string> {
+  const order = await prisma.order.findUnique({
+    where: { orderNumber: orderNumber.trim().toUpperCase() },
+    select: { id: true, status: true },
+  })
+  if (!order) throw new Error("Order not found")
+  if (order.status !== "PAID" && order.status !== "COMPLETED") {
+    throw new Error("This order is not paid yet")
+  }
+
+  const item = await prisma.orderItem.findFirst({
+    where: { id: itemId, orderId: order.id },
+    include: { photo: { select: { originalKey: true, filename: true } } },
+  })
+  if (!item) throw new Error("Download not available for this order")
+
+  return createDownloadUrl(item.photo.originalKey, item.photo.filename, DOWNLOAD_TTL_SECONDS)
 }
