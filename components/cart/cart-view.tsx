@@ -20,8 +20,8 @@ export function CartView() {
         <p className="mt-2 max-w-sm text-pretty text-sm text-muted-foreground">
           Browse the event gallery and tap the plus icon on any photo to add it to your selection.
         </p>
-        <Button asChild className="mt-6 rounded-full">
-          <Link href="/">Browse photos</Link>
+        <Button className="mt-6 rounded-full" render={<Link href="/" />}>
+          Browse photos
         </Button>
       </div>
     )
@@ -50,7 +50,7 @@ export function CartView() {
         <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           {items.map((item) => (
             <li
-              key={item.id}
+              key={item.photoId}
               className="group relative overflow-hidden rounded-2xl border border-border bg-card"
             >
               <div className="relative aspect-square">
@@ -73,7 +73,7 @@ export function CartView() {
                   size="icon"
                   variant="ghost"
                   className="size-8 shrink-0 rounded-full text-muted-foreground hover:text-destructive"
-                  onClick={() => removeItem(item.id)}
+                  onClick={() => removeItem(item.photoId)}
                   aria-label={`Remove photo ${item.photoNumber}`}
                 >
                   <Trash2 className="size-4" />
@@ -97,11 +97,9 @@ export function CartView() {
               <dd className="font-semibold">{formatPrice(total)}</dd>
             </div>
           </dl>
-          <Button asChild className="mt-6 w-full rounded-full">
-            <Link href="/checkout">
-              Proceed to checkout
-              <ArrowRight className="size-4" />
-            </Link>
+          <Button className="mt-6 w-full rounded-full" render={<Link href="/checkout" />}>
+            Proceed to checkout
+            <ArrowRight className="size-4" />
           </Button>
           <p className="mt-4 text-center text-xs leading-relaxed text-muted-foreground">
             No payment is taken online. You&apos;ll receive an order number to pay at the Flooy Photo

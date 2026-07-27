@@ -23,8 +23,8 @@ export function CheckoutView() {
       <div className="rounded-3xl border border-border bg-card px-6 py-16 text-center">
         <h1 className="text-xl font-semibold">Nothing to check out</h1>
         <p className="mt-2 text-sm text-muted-foreground">Add some photos to your selection first.</p>
-        <Button asChild className="mt-6 rounded-full">
-          <Link href="/">Browse photos</Link>
+        <Button className="mt-6 rounded-full" render={<Link href="/" />}>
+          Browse photos
         </Button>
       </div>
     )
@@ -48,7 +48,7 @@ export function CheckoutView() {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone, photoIds: items.map((i) => i.id) }),
+        body: JSON.stringify({ name, email, phone, photoIds: items.map((i) => i.photoId) }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -119,7 +119,7 @@ export function CheckoutView() {
             </h2>
             <ul className="mt-4 grid grid-cols-4 gap-2">
               {items.slice(0, 8).map((item) => (
-                <li key={item.id} className="relative aspect-square overflow-hidden rounded-lg">
+                <li key={item.photoId} className="relative aspect-square overflow-hidden rounded-lg">
                   <Image
                     src={item.previewUrl || "/placeholder.svg"}
                     alt=""

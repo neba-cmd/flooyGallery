@@ -8,7 +8,7 @@ const STORAGE_KEY = "flooy.cart.v1"
 type CartContextValue = {
   items: CartItem[]
   count: number
-  totalAmount: number
+  total: number
   hasItem: (photoId: string) => boolean
   addItem: (item: CartItem) => void
   removeItem: (photoId: string) => void
@@ -68,7 +68,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     () => ({
       items,
       count: items.length,
-      totalAmount: items.reduce((sum, i) => sum + i.price, 0),
+      total: items.reduce((sum, i) => sum + (Number(i.price) || 0), 0),
       hasItem,
       addItem,
       removeItem,

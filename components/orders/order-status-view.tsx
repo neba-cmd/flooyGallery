@@ -99,11 +99,11 @@ export function OrderStatusView({ order }: { order: OrderDTO }) {
           </div>
           <div>
             <dt className="text-muted-foreground">Photos</dt>
-            <dd className="mt-1 font-medium">{order.items.length}</dd>
+            <dd className="mt-1 font-medium">{order.itemCount}</dd>
           </div>
           <div>
             <dt className="text-muted-foreground">Total</dt>
-            <dd className="mt-1 font-medium">{formatPrice(order.total)}</dd>
+            <dd className="mt-1 font-medium">{formatPrice(order.totalAmount)}</dd>
           </div>
           <div>
             <dt className="text-muted-foreground">Placed</dt>
@@ -114,24 +114,24 @@ export function OrderStatusView({ order }: { order: OrderDTO }) {
 
       <h2 className="mt-8 mb-4 text-lg font-semibold">Your photos</h2>
       <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-        {order.items.map((item) => (
+        {order.items?.map((item) => (
           <li key={item.id} className="overflow-hidden rounded-2xl border border-border bg-card">
             <div className="relative aspect-square">
               <Image
-                src={item.previewUrl || "/placeholder.svg"}
-                alt={item.filename}
+                src={item.photo.previewUrl || "/placeholder.svg"}
+                alt={item.photo.filename}
                 fill
                 sizes="240px"
                 className="object-cover"
               />
             </div>
             <div className="p-3">
-              <p className="truncate font-mono text-xs text-muted-foreground">#{item.photoNumber}</p>
+              <p className="truncate font-mono text-xs text-muted-foreground">#{item.photo.photoNumber}</p>
               {status.downloadable ? (
                 <Button
                   size="sm"
                   className="mt-2 w-full rounded-full"
-                  onClick={() => handleDownload(item.id, item.filename)}
+                  onClick={() => handleDownload(item.id, item.photo.filename)}
                   disabled={downloadingId === item.id}
                 >
                   {downloadingId === item.id ? (

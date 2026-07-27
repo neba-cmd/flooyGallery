@@ -6,8 +6,8 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ orderNumber: string; itemId: string }> },
 ) {
-  const limit = rateLimit(`download:${clientKey(req)}`, { limit: 60, windowMs: 60_000 })
-  if (!limit.ok) {
+  const limit = rateLimit(clientKey(req, "download"), 60, 60_000)
+  if (!limit.success) {
     return NextResponse.json({ error: "Too many requests. Please slow down." }, { status: 429 })
   }
 

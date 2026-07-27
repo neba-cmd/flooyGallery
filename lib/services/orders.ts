@@ -40,7 +40,7 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderDTO> {
   const eventId = photos[0].eventId
 
   for (let attempt = 0; attempt < 5; attempt++) {
-    const orderNumber = generateOrderNumber()
+    const orderNumber = await generateOrderNumber()
     try {
       const order = await prisma.order.create({
         data: {

@@ -69,7 +69,17 @@ function PhotoCardBase({ photo, onOpen }: PhotoCardProps) {
 
         <button
           type="button"
-          onClick={() => toggleItem({ photoId: photo.id, price: photo.price, filename: photo.filename, previewUrl: photo.previewUrl, photoNumber: photo.photoNumber })}
+          onClick={() =>
+            toggleItem({
+              photoId: photo.id,
+              price: photo.price,
+              filename: photo.filename,
+              previewUrl: photo.previewUrl,
+              photoNumber: photo.photoNumber,
+              eventId: photo.eventId,
+              eventName: photo.eventName,
+            })
+          }
           className={cn(
             "pointer-events-auto flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium shadow-sm backdrop-blur-sm transition-colors",
             selected

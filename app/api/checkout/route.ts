@@ -11,8 +11,8 @@ const checkoutSchema = z.object({
 })
 
 export async function POST(req: NextRequest) {
-  const limit = rateLimit(`checkout:${clientKey(req)}`, { limit: 10, windowMs: 60_000 })
-  if (!limit.ok) {
+  const limit = rateLimit(clientKey(req, "checkout"), 20, 60_000)
+  if (!limit.success) {
     return NextResponse.json({ error: "Too many requests. Please wait a moment." }, { status: 429 })
   }
 

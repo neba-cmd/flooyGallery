@@ -126,6 +126,8 @@ export function Lightbox({ photos, index, onClose, onNavigate }: LightboxProps) 
               filename: photo.filename,
               previewUrl: photo.previewUrl,
               photoNumber: photo.photoNumber,
+              eventId: photo.eventId,
+              eventName: photo.eventName,
             })
           }
           variant={selected ? "secondary" : "default"}
