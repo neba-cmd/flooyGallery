@@ -57,7 +57,7 @@ export async function saveEventAction(input: z.input<typeof eventSchema>) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       throw new Error("An event with this slug already exists.")
     }
-    console.error("[admin:event] Event save failed")
+    console.error("[admin:event] Event save failed", error)
     throw new Error("Could not save the event.")
   }
   revalidatePath("/admin/events")

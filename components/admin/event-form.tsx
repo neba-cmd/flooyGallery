@@ -38,7 +38,7 @@ export function EventForm({ event }: { event?: EventDTO & { description?: string
         <label className="block text-sm">Description<textarea name="description" defaultValue={event?.description ?? ""} className="mt-1 min-h-20 w-full rounded-lg border bg-background p-3" /></label>
         <label className="block text-sm">Default price (pence)<input required type="number" min="1" name="defaultPrice" defaultValue={event?.defaultPrice ?? 1500} className="mt-1 h-9 w-full rounded-lg border bg-background px-3" /></label>
         <label className="flex gap-2 text-sm"><input type="checkbox" name="published" defaultChecked={event?.published ?? true} />Active/public</label>
-        <div className="flex justify-end gap-2"><Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button><Button disabled={pending}>{pending ? "Saving…" : "Save"}</Button></div>
+        <div className="flex justify-end gap-2"><Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button><Button type="submit" disabled={pending}>{pending ? "Saving…" : "Save"}</Button></div>
       </form>
     </div>}
   </>
