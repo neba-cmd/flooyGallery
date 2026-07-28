@@ -1,16 +1,16 @@
 "use client"
 
-import Image from "next/image"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Download, Loader2, MapPin, Copy, Check } from "lucide-react"
-import type { OrderDTO } from "@/types"
+import type { PublicOrderDTO } from "@/types"
 import { Button } from "@/components/ui/button"
 import { formatPrice, formatDateTime } from "@/lib/format"
 import { ORDER_STATUS } from "@/lib/order-status"
 import { cn } from "@/lib/utils"
+import { SafeImage } from "@/components/safe-image"
 
-export function OrderStatusView({ order }: { order: OrderDTO }) {
+export function OrderStatusView({ order }: { order: PublicOrderDTO }) {
   const status = ORDER_STATUS[order.status]
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
@@ -117,7 +117,7 @@ export function OrderStatusView({ order }: { order: OrderDTO }) {
         {order.items?.map((item) => (
           <li key={item.id} className="overflow-hidden rounded-2xl border border-border bg-card">
             <div className="relative aspect-square">
-              <Image
+              <SafeImage
                 src={item.photo.previewUrl || "/placeholder.svg"}
                 alt={item.photo.filename}
                 fill

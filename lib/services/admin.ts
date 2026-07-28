@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db"
 import { serializeOrder } from "@/lib/serialize"
 import type { OrderDTO, OrderStatus } from "@/types"
+import { Prisma } from "@/lib/generated/prisma/client"
 
 export type AdminStats = {
   totalOrders: number
@@ -32,6 +33,8 @@ export async function getAdminStats(): Promise<AdminStats> {
     todayAgg,
     recent,
     events,
+    eventRevenue,
+    customerCount,
   ] = await Promise.all([
     prisma.order.count(),
     prisma.order.count({ where: { status: "PENDING_PAYMENT" } }),
@@ -59,7 +62,19 @@ export async function getAdminStats(): Promise<AdminStats> {
       orderBy: { photos: { _count: "desc" } },
       include: { _count: { select: { photos: true, orders: true } } },
     }),
+    prisma.order.groupBy({
+      by: ["eventId"],
+      where: { eventId: { not: null }, status: { in: ["PAID", "COMPLETED"] } },
+      _sum: { totalAmount: true },
+    }),
+    prisma.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(DISTINCT LOWER(COALESCE(NULLIF("customerEmail", ''), NULLIF("customerPhone", ''), "customerName"))) AS count
+      FROM "Order"
+    `,
   ])
+  const revenueByEvent = new Map(
+    eventRevenue.flatMap((row) => row.eventId ? [[row.eventId, row._sum.totalAmount ?? 0] as const] : []),
+  )
 
   return {
     totalOrders,
@@ -67,26 +82,20 @@ export async function getAdminStats(): Promise<AdminStats> {
     paidOrders,
     completedOrders,
     cancelledOrders,
-    totalCustomers: new Set(
-      (await prisma.order.findMany({ select: { customerEmail: true, customerPhone: true, customerName: true } }))
-        .map((order) => (order.customerEmail || order.customerPhone || order.customerName).toLowerCase()),
-    ).size,
+    totalCustomers: Number(customerCount[0]?.count ?? 0),
     totalPhotos,
     totalEvents,
     revenuePaid: paidAgg._sum.totalAmount ?? 0,
     revenuePending: pendingAgg._sum.totalAmount ?? 0,
     revenueToday: todayAgg._sum.totalAmount ?? 0,
     recentOrders: recent.map(serializeOrder),
-    topEvents: await Promise.all(events.map(async (e) => ({
+    topEvents: events.map((e) => ({
       id: e.id,
       name: e.name,
       photoCount: e._count.photos,
       orderCount: e._count.orders,
-      revenue: (await prisma.order.aggregate({
-        _sum: { totalAmount: true },
-        where: { eventId: e.id, status: { in: ["PAID", "COMPLETED"] } },
-      }))._sum.totalAmount ?? 0,
-    }))),
+      revenue: revenueByEvent.get(e.id) ?? 0,
+    })),
   }
 }
 
@@ -150,52 +159,65 @@ export async function getOrderDetail(orderNumber: string): Promise<OrderDTO | nu
   return order ? serializeOrder(order) : null
 }
 
-export async function listCustomers(search?: string) {
-  // Customers are derived from orders (no separate account model).
-  const orders = await prisma.order.findMany({
-    where: search?.trim()
-      ? {
-          OR: [
-            { customerName: { contains: search.trim(), mode: "insensitive" } },
-            { customerEmail: { contains: search.trim(), mode: "insensitive" } },
-            { customerPhone: { contains: search.trim(), mode: "insensitive" } },
-          ],
-        }
-      : undefined,
-    orderBy: { createdAt: "desc" },
-    select: {
-      customerName: true,
-      customerEmail: true,
-      customerPhone: true,
-      totalAmount: true,
-      status: true,
-      createdAt: true,
-    },
-  })
+type CustomerQueryRow = {
+  customerKey: string
+  name: string
+  email: string | null
+  phone: string | null
+  orders: bigint
+  spent: bigint
+  lastOrder: Date
+}
 
-  const map = new Map<
-    string,
-    { name: string; email: string | null; phone: string | null; orders: number; spent: number; lastOrder: string }
-  >()
-
-  for (const o of orders) {
-    const key = (o.customerEmail || o.customerPhone || o.customerName).toLowerCase()
-    const existing = map.get(key)
-    const spent = o.status === "PAID" || o.status === "COMPLETED" ? o.totalAmount : 0
-    if (existing) {
-      existing.orders += 1
-      existing.spent += spent
-    } else {
-      map.set(key, {
-        name: o.customerName,
-        email: o.customerEmail,
-        phone: o.customerPhone,
-        orders: 1,
-        spent,
-        lastOrder: o.createdAt.toISOString(),
-      })
-    }
+export async function listCustomers(options: { search?: string; page?: number; pageSize?: number } = {}) {
+  const page = Math.max(options.page ?? 1, 1)
+  const pageSize = Math.min(Math.max(options.pageSize ?? 25, 1), 100)
+  const search = options.search?.trim()
+  const filter = search
+    ? Prisma.sql`WHERE name ILIKE ${`%${search}%`} OR email ILIKE ${`%${search}%`} OR phone ILIKE ${`%${search}%`}`
+    : Prisma.empty
+  const aggregation = Prisma.sql`
+    WITH grouped AS (
+      SELECT
+        LOWER(COALESCE(NULLIF("customerEmail", ''), NULLIF("customerPhone", ''), "customerName")) AS "customerKey",
+        (ARRAY_AGG("customerName" ORDER BY "createdAt" DESC))[1] AS name,
+        (ARRAY_AGG("customerEmail" ORDER BY "createdAt" DESC))[1] AS email,
+        (ARRAY_AGG("customerPhone" ORDER BY "createdAt" DESC))[1] AS phone,
+        COUNT(*) AS orders,
+        COALESCE(SUM(CASE WHEN status IN ('PAID', 'COMPLETED') THEN "totalAmount" ELSE 0 END), 0) AS spent,
+        MAX("createdAt") AS "lastOrder"
+      FROM "Order"
+      GROUP BY LOWER(COALESCE(NULLIF("customerEmail", ''), NULLIF("customerPhone", ''), "customerName"))
+    )
+  `
+  const [rows, countRows] = await Promise.all([
+    prisma.$queryRaw<CustomerQueryRow[]>`
+      ${aggregation}
+      SELECT * FROM grouped
+      ${filter}
+      ORDER BY "lastOrder" DESC
+      LIMIT ${pageSize} OFFSET ${(page - 1) * pageSize}
+    `,
+    prisma.$queryRaw<[{ count: bigint }]>`
+      ${aggregation}
+      SELECT COUNT(*) AS count FROM grouped
+      ${filter}
+    `,
+  ])
+  const total = Number(countRows[0]?.count ?? 0)
+  return {
+    customers: rows.map((row) => ({
+      key: row.customerKey,
+      name: row.name,
+      email: row.email,
+      phone: row.phone,
+      orders: Number(row.orders),
+      spent: Number(row.spent),
+      lastOrder: row.lastOrder.toISOString(),
+    })),
+    page,
+    pageSize,
+    total,
+    totalPages: Math.ceil(total / pageSize),
   }
-
-  return Array.from(map.values()).sort((a, b) => (a.lastOrder < b.lastOrder ? 1 : -1))
 }

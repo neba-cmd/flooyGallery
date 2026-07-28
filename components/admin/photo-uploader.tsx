@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 type Upload = { id: string; file: File; progress: number; status: "pending"|"uploading"|"complete"|"failed"|"cancelled"; error?: string }
 const TYPES = ["image/jpeg","image/png","image/webp"]
 const MAX = 30 * 1024 * 1024
+const MAX_BATCH_FILES = 100
+const UPLOAD_CONCURRENCY = 3
 
 function loadImage(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve,reject) => { const image=new Image(); const url=URL.createObjectURL(file); image.onload=()=>{URL.revokeObjectURL(url);resolve(image)}; image.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Image could not be read"))}; image.src=url })
@@ -34,7 +36,13 @@ export function PhotoUploader({ events, photographers }: { events:{id:string;nam
       const generated=await preview(item.file)
       const response=await fetch("/api/admin/uploads/presign",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({eventId,filename:item.file.name,contentType:item.file.type,previewContentType:"image/jpeg",fileSize:item.file.size}),signal:controller.signal})
       const signed=await response.json(); if(!response.ok) throw new Error(signed.error??"Could not prepare upload")
-      await Promise.all([put(signed.originalUrl,item.file,item.file.type,n=>update(item.id,{progress:Math.round(n*75)}),controller.signal),put(signed.previewUrl,generated.blob,"image/jpeg",()=>{},controller.signal)])
+      let originalProgress=0
+      let previewProgress=0
+      const reportProgress=()=>update(item.id,{progress:Math.round(5+originalProgress*45+previewProgress*45)})
+      await Promise.all([
+        put(signed.originalUrl,item.file,item.file.type,n=>{originalProgress=n;reportProgress()},controller.signal),
+        put(signed.previewUrl,generated.blob,"image/jpeg",n=>{previewProgress=n;reportProgress()},controller.signal),
+      ])
       const complete=await fetch("/api/admin/uploads/complete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({eventId,photographer,filename:item.file.name,originalKey:signed.originalKey,previewKey:signed.previewKey,width:generated.width,height:generated.height,fileSize:item.file.size}),signal:controller.signal})
       const result=await complete.json(); if(!complete.ok) throw new Error(result.error??"Could not save upload")
       update(item.id,{status:"complete",progress:100})
@@ -45,8 +53,13 @@ export function PhotoUploader({ events, photographers }: { events:{id:string;nam
   }
   function add(files:FileList|File[]) {
     if(!eventId||!photographer.trim()){toast.error("Select an event and enter a photographer first");return}
-    const valid:Array<Upload>=[]; for(const file of Array.from(files)){if(!TYPES.includes(file.type)){toast.error(`${file.name}: unsupported file type`);continue}if(file.size>MAX){toast.error(`${file.name}: exceeds 30 MB`);continue}valid.push({id:crypto.randomUUID(),file,progress:0,status:"pending"})}
-    setUploads(items=>[...valid,...items]); valid.forEach(run)
+    const selected=Array.from(files).slice(0,MAX_BATCH_FILES)
+    if(files.length>MAX_BATCH_FILES) toast.error(`Upload batches are limited to ${MAX_BATCH_FILES} files`)
+    const valid:Array<Upload>=[]; for(const file of selected){if(!TYPES.includes(file.type)){toast.error(`${file.name}: unsupported file type`);continue}if(file.size>MAX){toast.error(`${file.name}: exceeds 30 MB`);continue}valid.push({id:crypto.randomUUID(),file,progress:0,status:"pending"})}
+    setUploads(items=>[...valid,...items])
+    let next=0
+    async function worker(){while(next<valid.length){const item=valid[next++];await run(item)}}
+    void Promise.all(Array.from({length:Math.min(UPLOAD_CONCURRENCY,valid.length)},worker))
   }
   return <div className="space-y-5">
     <div className="grid gap-3 sm:grid-cols-2"><label className="text-sm">Event<select value={eventId} onChange={e=>setEventId(e.target.value)} className="mt-1 h-10 w-full rounded-lg border bg-card px-3">{events.map(e=><option key={e.id} value={e.id}>{e.name}</option>)}</select></label><label className="text-sm">Photographer<input list="photographers" value={photographer} onChange={e=>setPhotographer(e.target.value)} className="mt-1 h-10 w-full rounded-lg border bg-card px-3"/><datalist id="photographers">{photographers.map(p=><option key={p}>{p}</option>)}</datalist></label></div>

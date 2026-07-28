@@ -2,7 +2,29 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { hasAdminSession } from "@/lib/session"
 import { prisma } from "@/lib/db"
-import { resolvePreviewUrl } from "@/lib/storage/r2"
+import {
+  deleteObjects,
+  getObjectMetadata,
+  getObjectPrefix,
+  resolvePreviewUrl,
+} from "@/lib/storage/r2"
+
+const MAX_ORIGINAL_BYTES = 30 * 1024 * 1024
+const MAX_PREVIEW_BYTES = 5 * 1024 * 1024
+const ORIGINAL_TYPES = new Set(["image/jpeg", "image/png", "image/webp"])
+
+function detectedImageType(bytes: Uint8Array): string | null {
+  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "image/jpeg"
+  if (
+    bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47 &&
+    bytes[4] === 0x0d && bytes[5] === 0x0a && bytes[6] === 0x1a && bytes[7] === 0x0a
+  ) return "image/png"
+  if (
+    String.fromCharCode(...bytes.slice(0, 4)) === "RIFF" &&
+    String.fromCharCode(...bytes.slice(8, 12)) === "WEBP"
+  ) return "image/webp"
+  return null
+}
 
 const schema = z.object({
   eventId: z.string().cuid(),
@@ -26,7 +48,38 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid storage key" }, { status: 400 })
   }
   try {
+    const [originalMetadata, previewMetadata, originalPrefix, previewPrefix] = await Promise.all([
+      getObjectMetadata(data.originalKey),
+      getObjectMetadata(data.previewKey),
+      getObjectPrefix(data.originalKey),
+      getObjectPrefix(data.previewKey),
+    ])
+    const originalDetectedType = detectedImageType(originalPrefix)
+    const previewDetectedType = detectedImageType(previewPrefix)
+    if (
+      !ORIGINAL_TYPES.has(originalMetadata.contentType) ||
+      originalDetectedType !== originalMetadata.contentType ||
+      originalMetadata.contentLength !== data.fileSize ||
+      originalMetadata.contentLength > MAX_ORIGINAL_BYTES ||
+      previewMetadata.contentType !== "image/jpeg" ||
+      previewDetectedType !== "image/jpeg" ||
+      previewMetadata.contentLength > MAX_PREVIEW_BYTES
+    ) {
+      try {
+        await deleteObjects([data.originalKey, data.previewKey])
+      } catch {
+        console.error("[upload] Invalid objects could not be cleaned up")
+      }
+      return NextResponse.json({ error: "Uploaded files failed image validation" }, { status: 400 })
+    }
+
     const photo = await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${data.eventId}))`
+      const existing = await tx.photo.findFirst({
+        where: { originalKey: data.originalKey, previewKey: data.previewKey },
+        select: { id: true, photoNumber: true },
+      })
+      if (existing) return existing
       const max = await tx.photo.aggregate({ where: { eventId: data.eventId }, _max: { photoNumber: true } })
       return tx.photo.create({ data: {
         eventId: data.eventId, photographer: data.photographer, filename: data.filename,

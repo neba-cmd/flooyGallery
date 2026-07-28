@@ -89,6 +89,9 @@ export function Lightbox({ photos, index, onClose, onNavigate }: LightboxProps) 
           <img
             src={photo.previewUrl || "/placeholder.svg"}
             alt={`Preview of ${photo.filename}`}
+            onError={(event) => {
+              event.currentTarget.src = "/placeholder.svg"
+            }}
             onClick={() => setZoomed((z) => !z)}
             className={cn(
               "mx-auto rounded-lg object-contain transition-transform duration-300",

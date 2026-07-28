@@ -61,6 +61,8 @@ export interface OrderDTO {
   items?: OrderItemDTO[]
 }
 
+export type PublicOrderDTO = Omit<OrderDTO, "customerEmail" | "customerPhone">
+
 export interface PaginatedResult<T> {
   items: T[]
   nextCursor: string | null

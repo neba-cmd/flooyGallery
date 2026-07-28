@@ -52,8 +52,8 @@ model Photo {
   photographer String?
 
   // Storage keys (R2 object keys, never exposed directly to customers)
-  previewKey  String // events/<eventId>/previews/<file>
-  originalKey String // events/<eventId>/originals/<file>
+  previewKey  String @unique // events/<eventId>/previews/<file>
+  originalKey String @unique // events/<eventId>/originals/<file>
   // Public preview URL (watermarked + compressed). Safe to expose.
   previewUrl  String
 
@@ -68,8 +68,8 @@ model Photo {
 
   orderItems OrderItem[]
 
+  @@unique([eventId, photoNumber])
   @@index([eventId])
-  @@index([eventId, photoNumber])
   @@index([filename])
   @@index([photographer])
   @@index([createdAt])
@@ -78,6 +78,7 @@ model Photo {
 model Order {
   id          String  @id @default(cuid())
   orderNumber String  @unique // e.g. FLOOY-48372
+  checkoutKey String? @unique // client-generated idempotency key
   eventId     String?
   event       Event?  @relation(fields: [eventId], references: [id], onDelete: SetNull)
 
@@ -100,6 +101,8 @@ model Order {
 
   @@index([orderNumber])
   @@index([status])
+  @@index([status, paidAt])
+  @@index([eventId])
   @@index([customerEmail])
   @@index([createdAt])
 }
@@ -152,6 +155,8 @@ model Session {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([userId])
+  @@index([expiresAt])
   @@map("session")
 }
 
@@ -171,6 +176,8 @@ model Account {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
+  @@unique([providerId, accountId])
+  @@index([userId])
   @@map("account")
 }
 
@@ -182,5 +189,7 @@ model Verification {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  @@index([identifier])
+  @@index([expiresAt])
   @@map("verification")
 }

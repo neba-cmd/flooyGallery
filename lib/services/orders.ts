@@ -3,7 +3,7 @@ import { generateOrderNumber } from "@/lib/order-number"
 import { serializeOrder, effectivePrice } from "@/lib/serialize"
 import { createDownloadUrl, objectExists } from "@/lib/storage/r2"
 import type { OrderDTO } from "@/types"
-import type { OrderStatus } from "@/lib/generated/prisma/client"
+import { Prisma, type OrderStatus } from "@/lib/generated/prisma/client"
 
 const DOWNLOAD_TTL_SECONDS = 300
 
@@ -12,6 +12,7 @@ export type CreateOrderInput = {
   customerEmail?: string | null
   customerPhone?: string | null
   photoIds: string[]
+  checkoutKey?: string
 }
 
 /**
@@ -22,6 +23,13 @@ export type CreateOrderInput = {
  * constraint so concurrent checkouts at a busy event never collide.
  */
 export async function createOrder(input: CreateOrderInput): Promise<OrderDTO> {
+  if (input.checkoutKey) {
+    const existing = await prisma.order.findUnique({
+      where: { checkoutKey: input.checkoutKey },
+      include: { items: { include: { photo: true } }, event: true },
+    })
+    if (existing) return serializeOrder(existing)
+  }
   const photoIds = Array.from(new Set(input.photoIds))
   if (photoIds.length === 0) throw new Error("Cannot create an order with no photos")
 
@@ -42,6 +50,9 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderDTO> {
     photoId: p.id,
     unitPrice: effectivePrice(p.price, p.event.defaultPrice),
   }))
+  if (items.some((item) => !Number.isSafeInteger(item.unitPrice) || item.unitPrice <= 0)) {
+    throw new Error("One or more selected photos has an invalid price")
+  }
   const totalAmount = items.reduce((sum, i) => sum + i.unitPrice, 0)
   const eventId = photos[0].eventId
 
@@ -51,6 +62,7 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderDTO> {
       const order = await prisma.order.create({
         data: {
           orderNumber,
+          checkoutKey: input.checkoutKey,
           eventId,
           customerName: input.customerName.trim(),
           customerEmail: input.customerEmail?.trim() || null,
@@ -63,8 +75,15 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderDTO> {
       })
       return serializeOrder(order)
     } catch (err: unknown) {
+      if (input.checkoutKey && err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+        const existing = await prisma.order.findUnique({
+          where: { checkoutKey: input.checkoutKey },
+          include: { items: { include: { photo: true } }, event: true },
+        })
+        if (existing) return serializeOrder(existing)
+      }
       // Unique constraint violation on orderNumber — retry with a new number.
-      if (typeof err === "object" && err && "code" in err && (err as { code: string }).code === "P2002") {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
         continue
       }
       throw err
@@ -136,9 +155,13 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus): P
     timestamps.cancelledAt = null
   }
 
-  const order = await prisma.order.update({
-    where: { id: orderId },
+  const update = await prisma.order.updateMany({
+    where: { id: orderId, status: current.status },
     data: { status, ...timestamps },
+  })
+  if (update.count !== 1) throw new Error("Order status changed elsewhere. Refresh and try again.")
+  const order = await prisma.order.findUniqueOrThrow({
+    where: { id: orderId },
     include: { items: { include: { photo: true } }, event: true },
   })
   return serializeOrder(order)

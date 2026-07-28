@@ -38,6 +38,9 @@ function PhotoCardBase({ photo, onOpen }: PhotoCardProps) {
           alt={`Preview of ${photo.filename}`}
           loading="lazy"
           decoding="async"
+          onError={(event) => {
+            event.currentTarget.src = "/placeholder.svg"
+          }}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
         />
         {/* Watermark overlay — reinforces the DB-side watermark and deters screenshots */}

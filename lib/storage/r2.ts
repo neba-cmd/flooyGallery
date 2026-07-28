@@ -55,10 +55,8 @@ export function originalKey(eventId: string, filename: string): string {
  * from the CDN. Otherwise we fall back to the app's caching proxy route.
  */
 export function resolvePreviewUrl(key: string): string {
-  const base = r2Env.publicUrl
-  if (base) {
-    return `${base.replace(/\/$/, "")}/${key}`
-  }
+  // The application uses a single private bucket. Proxying only preview keys
+  // prevents a public bucket/domain from exposing originals.
   return `/api/preview/${key}`
 }
 
@@ -84,10 +82,17 @@ export async function createDownloadUrl(
   downloadFilename: string,
   expiresInSeconds = 60 * 60, // 1 hour
 ): Promise<string> {
+  const safeFilename =
+    downloadFilename
+      .replace(/[\u0000-\u001f\u007f/\\"]/g, "_")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 180) || "flooy-photo"
   const command = new GetObjectCommand({
     Bucket: r2Env.bucket,
     Key: key,
-    ResponseContentDisposition: `attachment; filename="${downloadFilename.replace(/"/g, "")}"`,
+    ResponseContentDisposition: `attachment; filename="${safeFilename}"`,
+    ResponseContentType: "application/octet-stream",
   })
   return getSignedUrl(client(), command, { expiresIn: expiresInSeconds })
 }
@@ -101,6 +106,22 @@ export async function objectExists(key: string): Promise<boolean> {
     if (status === 404) return false
     throw error
   }
+}
+
+export async function getObjectMetadata(key: string) {
+  const result = await client().send(new HeadObjectCommand({ Bucket: r2Env.bucket, Key: key }))
+  return {
+    contentLength: result.ContentLength ?? 0,
+    contentType: result.ContentType?.toLowerCase() ?? "",
+  }
+}
+
+export async function getObjectPrefix(key: string): Promise<Uint8Array> {
+  const result = await client().send(
+    new GetObjectCommand({ Bucket: r2Env.bucket, Key: key, Range: "bytes=0-15" }),
+  )
+  if (!result.Body) throw new Error("Storage object has no body")
+  return result.Body.transformToByteArray()
 }
 
 /** Stream a preview object (used by the caching proxy fallback). */

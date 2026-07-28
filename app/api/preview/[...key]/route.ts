@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getObjectStream, isStorageConfigured } from "@/lib/storage/r2"
+import { clientKey, rateLimit } from "@/lib/rate-limit"
 
 /**
  * Caching proxy for preview (watermarked) images.
@@ -8,9 +9,13 @@ import { getObjectStream, isStorageConfigured } from "@/lib/storage/r2"
  * serve publicly; originals are NEVER served through this route.
  */
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ key: string[] }> },
 ) {
+  const limit = rateLimit(clientKey(req, "preview"), 300, 60_000)
+  if (!limit.success) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 })
+  }
   if (!isStorageConfigured()) {
     return NextResponse.json({ error: "Storage not configured" }, { status: 503 })
   }

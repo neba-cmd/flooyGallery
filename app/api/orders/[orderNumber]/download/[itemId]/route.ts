@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getSignedDownloadUrl } from "@/lib/services/orders"
 import { rateLimit, clientKey } from "@/lib/rate-limit"
+import { orderAccessCookieName, verifyOrderAccessToken } from "@/lib/order-access"
 
 export async function GET(
   req: NextRequest,
@@ -12,9 +13,14 @@ export async function GET(
   }
 
   const { orderNumber, itemId } = await params
+  const normalizedOrderNumber = decodeURIComponent(orderNumber).trim().toUpperCase()
+  const accessToken = req.cookies.get(orderAccessCookieName(normalizedOrderNumber))?.value
+  if (!verifyOrderAccessToken(normalizedOrderNumber, accessToken)) {
+    return NextResponse.json({ error: "Order verification required" }, { status: 403 })
+  }
 
   try {
-    const url = await getSignedDownloadUrl(decodeURIComponent(orderNumber), itemId)
+    const url = await getSignedDownloadUrl(normalizedOrderNumber, itemId)
     return NextResponse.json({ url })
   } catch (err) {
     const known = new Set([

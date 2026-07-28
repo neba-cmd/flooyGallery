@@ -1,4 +1,4 @@
-import type { OrderDTO, OrderItemDTO, PhotoDTO, EventDTO } from "@/types"
+import type { OrderDTO, OrderItemDTO, PhotoDTO, EventDTO, PublicOrderDTO } from "@/types"
 
 /**
  * Serializers convert Prisma rows (with Date objects and nullable price
@@ -111,5 +111,21 @@ export function serializeOrder(row: OrderRow): OrderDTO {
     paidAt: row.paidAt ? row.paidAt.toISOString() : null,
     completedAt: row.completedAt ? row.completedAt.toISOString() : null,
     items,
+  }
+}
+
+export function toPublicOrder(order: OrderDTO): PublicOrderDTO {
+  return {
+    id: order.id,
+    orderNumber: order.orderNumber,
+    customerName: order.customerName,
+    status: order.status,
+    totalAmount: order.totalAmount,
+    eventName: order.eventName,
+    itemCount: order.itemCount,
+    createdAt: order.createdAt,
+    paidAt: order.paidAt,
+    completedAt: order.completedAt,
+    items: order.items,
   }
 }

@@ -28,11 +28,17 @@ export async function GET(request: Request) {
   }
 
   const { dateFrom, dateTo, ...rest } = parsed.data
-  const page = await queryPhotos({
-    ...rest,
-    dateFrom: dateFrom ? new Date(dateFrom) : undefined,
-    dateTo: dateTo ? new Date(dateTo) : undefined,
-  })
+  let page
+  try {
+    page = await queryPhotos({
+      ...rest,
+      dateFrom: dateFrom ? new Date(dateFrom) : undefined,
+      dateTo: dateTo ? new Date(dateTo) : undefined,
+    })
+  } catch {
+    console.error("[photos] Gallery query failed")
+    return NextResponse.json({ error: "Gallery is temporarily unavailable" }, { status: 503 })
+  }
 
   return NextResponse.json(page, {
     headers: { "Cache-Control": "private, max-age=10, stale-while-revalidate=30" },

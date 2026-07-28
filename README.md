@@ -15,7 +15,7 @@ Base UI, and Cloudflare R2-compatible object storage.
 
    ```bash
    npm install
-   npm run db:push
+   npm run db:migrate
    npx prisma generate
    npm run db:seed
    ```
@@ -38,6 +38,13 @@ Open `http://localhost:3000` for the gallery and `/admin/login` for management.
 For an empty production database, use Prisma migration/deployment rather than
 the demo seed.
 
+If an existing administrator's configured seed password has changed, reset it
+explicitly (this also revokes that administrator's sessions):
+
+```bash
+npm run db:admin:reset
+```
+
 ## Validation
 
 ```bash
@@ -55,9 +62,9 @@ npm run build
 3. Set `BETTER_AUTH_URL` and `NEXT_PUBLIC_APP_URL` to the production HTTPS URL.
 4. Configure R2 CORS to allow `PUT` from the production site for
    `image/jpeg`, `image/png`, and `image/webp`. Keep original objects private.
-5. Run `npm run db:push` once against a new production database. This repository
-   predates Prisma migration files, so do not mark or apply a fabricated
-   baseline migration to an existing populated database.
+5. Run `npm run db:migrate` against production before deploying application
+   code. The checked-in baseline supports fresh databases and the original
+   database has been registered against that baseline.
 6. Deploy with the default `npm run build` command, then bootstrap the first
    administrator using the seed command from a trusted environment.
 

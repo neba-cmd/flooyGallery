@@ -39,6 +39,17 @@ export default async function AdminDashboardPage() {
           ))}
         </CardContent>
       </Card>
+      <Card>
+        <CardHeader><CardTitle>Revenue by event</CardTitle></CardHeader>
+        <CardContent className="space-y-3">
+          {stats.topEvents.length === 0 ? <p className="text-sm text-muted-foreground">No events yet.</p> : stats.topEvents.map((event) => (
+            <div key={event.id} className="flex items-center justify-between gap-4 rounded-lg border p-3">
+              <div><p className="font-medium">{event.name}</p><p className="text-xs text-muted-foreground">{event.photoCount} photos · {event.orderCount} orders</p></div>
+              <p className="font-medium">{formatPrice(event.revenue)}</p>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
     </div>
   )
 }

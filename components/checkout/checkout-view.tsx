@@ -1,9 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import Image from "next/image"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 import { useCart } from "@/components/cart/cart-provider"
@@ -11,12 +10,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { formatPrice } from "@/lib/format"
+import { SafeImage } from "@/components/safe-image"
 
 export function CheckoutView() {
   const router = useRouter()
   const { items, total, count, clear } = useCart()
   const [submitting, setSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const checkoutKey = useRef<string | null>(null)
 
   if (count === 0) {
     return (
@@ -32,6 +33,7 @@ export function CheckoutView() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    if (submitting) return
     setErrors({})
     const form = new FormData(e.currentTarget)
     const name = String(form.get("name") ?? "").trim()
@@ -42,13 +44,28 @@ export function CheckoutView() {
       setErrors({ name: "Please enter your full name" })
       return
     }
+    if (!email && !phone) {
+      setErrors({ contact: "Enter an email address or phone number so you can securely retrieve the order." })
+      return
+    }
+    if (phone && phone.replace(/\D/g, "").length < 7) {
+      setErrors({ contact: "Enter a valid phone number." })
+      return
+    }
 
     setSubmitting(true)
+    checkoutKey.current ??= crypto.randomUUID()
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone, photoIds: items.map((i) => i.photoId) }),
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          photoIds: items.map((i) => i.photoId),
+          checkoutKey: checkoutKey.current,
+        }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -81,7 +98,7 @@ export function CheckoutView() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">
-                Email <span className="text-muted-foreground">(optional)</span>
+                Email
               </Label>
               <Input id="email" name="email" type="email" autoComplete="email" placeholder="jane@example.com" />
               <p className="text-xs text-muted-foreground">
@@ -90,9 +107,10 @@ export function CheckoutView() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">
-                Phone <span className="text-muted-foreground">(optional)</span>
+                Phone
               </Label>
               <Input id="phone" name="phone" type="tel" autoComplete="tel" placeholder="07123 456789" />
+              {errors.contact && <p role="alert" className="text-xs text-destructive">{errors.contact}</p>}
             </div>
           </div>
 
@@ -120,7 +138,7 @@ export function CheckoutView() {
             <ul className="mt-4 grid grid-cols-4 gap-2">
               {items.slice(0, 8).map((item) => (
                 <li key={item.photoId} className="relative aspect-square overflow-hidden rounded-lg">
-                  <Image
+                  <SafeImage
                     src={item.previewUrl || "/placeholder.svg"}
                     alt=""
                     fill

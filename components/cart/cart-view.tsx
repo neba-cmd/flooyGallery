@@ -1,11 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { ArrowRight, Trash2, ImageOff } from "lucide-react"
 import { useCart } from "@/components/cart/cart-provider"
 import { Button } from "@/components/ui/button"
 import { formatPrice } from "@/lib/format"
+import { SafeImage } from "@/components/safe-image"
 
 export function CartView() {
   const { items, removeItem, clear, total, count } = useCart()
@@ -54,7 +54,7 @@ export function CartView() {
               className="group relative overflow-hidden rounded-2xl border border-border bg-card"
             >
               <div className="relative aspect-square">
-                <Image
+                <SafeImage
                   src={item.previewUrl || "/placeholder.svg"}
                   alt={item.filename}
                   fill

@@ -11,8 +11,8 @@ export default function OrderLookupPage() {
     <main className="mx-auto flex min-h-[70vh] w-full max-w-md flex-col justify-center px-4 py-10 sm:px-6">
       <h1 className="text-2xl font-semibold tracking-tight text-balance">Find your order</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        Enter the order number shown at checkout (e.g. FLOOY-48372) to track its status and download
-        your photos once payment is confirmed.
+        Enter the order number and the email address or phone number used at checkout. This protects
+        your order details and purchased downloads.
       </p>
       <OrderLookup />
     </main>
