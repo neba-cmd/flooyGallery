@@ -9,6 +9,22 @@ function optional(key: string): string | undefined {
   return v && v.length > 0 ? v : undefined
 }
 
+function origin(value: string, key: string): string {
+  let url: URL
+  try {
+    url = new URL(value)
+  } catch {
+    throw new Error(`${key} must be a valid absolute URL`)
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    throw new Error(`${key} must use http or https`)
+  }
+  if (url.pathname !== "/" || url.search || url.hash) {
+    throw new Error(`${key} must be an origin without a path, query, or fragment`)
+  }
+  return url.origin
+}
+
 export function requiredEnv(key: string): string {
   const v = optional(key)
   if (!v) {
@@ -31,7 +47,15 @@ export const env = {
     if (!value && process.env.NODE_ENV === "production") {
       throw new Error("BETTER_AUTH_URL or NEXT_PUBLIC_APP_URL is required in production")
     }
-    return value ?? "http://localhost:3000"
+    return origin(value ?? "http://localhost:3000", "BETTER_AUTH_URL")
+  },
+  get betterAuthTrustedOrigins() {
+    const configured = optional("BETTER_AUTH_TRUSTED_ORIGINS")
+      ?.split(",")
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .map((value) => origin(value, "BETTER_AUTH_TRUSTED_ORIGINS")) ?? []
+    return [...new Set([this.betterAuthUrl, ...configured])]
   },
   appUrl: optional("NEXT_PUBLIC_APP_URL") ?? "http://localhost:3000",
 }
