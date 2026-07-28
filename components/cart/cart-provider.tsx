@@ -45,7 +45,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
-  // Persist on change (after hydration to avoid clobbering).
+  // Persist on change ( a after hydration to avoid clobbering).
   useEffect(() => {
     if (!hydrated) return
     try {
