@@ -100,9 +100,9 @@ export function Lightbox({ photos, index, onClose, onNavigate }: LightboxProps) 
           />
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-0 flex items-center justify-center text-4xl font-bold tracking-[0.3em] text-white/20 mix-blend-overlay select-none"
+            className="pointer-events-none absolute inset-0 flex -rotate-12 items-center justify-center text-5xl font-black tracking-[0.25em] text-red-600/70 select-none [text-shadow:0_2px_3px_white]"
           >
-            FLOOY
+            PREVIEW
           </span>
         </div>
 

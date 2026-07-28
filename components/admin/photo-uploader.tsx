@@ -18,7 +18,18 @@ async function preview(file: File) {
   canvas.width=Math.round(image.width*scale); canvas.height=Math.round(image.height*scale); const context=canvas.getContext("2d")
   if(!context) throw new Error("Preview generation is unavailable")
   context.drawImage(image,0,0,canvas.width,canvas.height)
-  context.save(); context.translate(canvas.width/2,canvas.height/2); context.rotate(-Math.PI/7); context.font=`600 ${Math.max(28,canvas.width/12)}px sans-serif`; context.textAlign="center"; context.fillStyle="rgba(255,255,255,.28)"; context.fillText("FLOOY PHOTOS",0,0); context.restore()
+  context.save()
+  context.translate(canvas.width/2,canvas.height/2)
+  context.rotate(-Math.PI/7)
+  context.font=`900 ${Math.max(42,canvas.width/8)}px sans-serif`
+  context.textAlign="center"
+  context.textBaseline="middle"
+  context.lineWidth=Math.max(3,canvas.width/300)
+  context.strokeStyle="rgba(255,255,255,.8)"
+  context.fillStyle="rgba(220,0,0,.72)"
+  context.strokeText("PREVIEW",0,0)
+  context.fillText("PREVIEW",0,0)
+  context.restore()
   const blob=await new Promise<Blob|null>(resolve=>canvas.toBlob(resolve,"image/jpeg",.78)); if(!blob) throw new Error("Preview generation failed")
   return { blob,width:image.naturalWidth,height:image.naturalHeight }
 }

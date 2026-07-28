@@ -43,12 +43,12 @@ function PhotoCardBase({ photo, onOpen }: PhotoCardProps) {
           }}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
         />
-        {/* Watermark overlay — reinforces the DB-side watermark and deters screenshots */}
+        {/* Reinforces the watermark baked into uploaded previews. */}
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-0 flex items-center justify-center text-xl font-semibold tracking-widest text-white/25 mix-blend-overlay select-none"
+          className="pointer-events-none absolute inset-0 flex -rotate-12 items-center justify-center text-2xl font-black tracking-widest text-red-600/70 select-none [text-shadow:0_1px_2px_white]"
         >
-          FLOOY
+          PREVIEW
         </span>
       </button>
 
