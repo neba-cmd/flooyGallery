@@ -39,7 +39,17 @@ export async function POST(req: NextRequest) {
     })
     return NextResponse.json({ order }, { status: 201 })
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Checkout failed"
-    return NextResponse.json({ error: message }, { status: 400 })
+    const known = new Set([
+      "Cannot create an order with no photos",
+      "None of the selected photos are available",
+      "One or more selected photos are no longer available",
+      "Photos from different events must be ordered separately",
+      "Could not generate a unique order number, please try again",
+    ])
+    const message = err instanceof Error && known.has(err.message) ? err.message : "Checkout is temporarily unavailable"
+    if (message === "Checkout is temporarily unavailable") {
+      console.error("[checkout] Order creation failed")
+    }
+    return NextResponse.json({ error: message }, { status: message.startsWith("Checkout is") ? 503 : 400 })
   }
 }

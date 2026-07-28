@@ -19,7 +19,7 @@ export async function GET(
   const key = segments.map((s) => decodeURIComponent(s)).join("/")
 
   // Only previews may be proxied. Never expose originals through this route.
-  if (!key.includes("/previews/")) {
+  if (!/^events\/[^/]+\/previews\/[^/]+$/.test(key) || key.includes("..")) {
     return NextResponse.json({ error: "Not found" }, { status: 404 })
   }
 

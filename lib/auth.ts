@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
 import { nextCookies } from "better-auth/next-js"
-import { APIError } from "better-auth/api"
+import { APIError, createAuthMiddleware } from "better-auth/api"
 import { prisma } from "@/lib/db"
 
 /**
@@ -26,7 +26,7 @@ export const auth = betterAuth({
     updateAge: 60 * 60 * 24, // refresh daily
   },
   hooks: {
-    before: async (ctx) => {
+    before: createAuthMiddleware(async (ctx) => {
       if (ctx.path === "/sign-up/email") {
         const userCount = await prisma.user.count()
         // Allow bootstrapping the first admin freely.
@@ -41,7 +41,7 @@ export const auth = betterAuth({
           })
         }
       }
-    },
+    }),
   },
   plugins: [nextCookies()],
 })

@@ -6,7 +6,7 @@ import { getSessionCookie } from "better-auth/cookies"
  * a valid session cookie (fast, no DB call); full verification happens in the
  * server components via `requireAdmin()`. Login/setup pages stay public.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   const isPublicAdminRoute =

@@ -4,8 +4,9 @@ import { listPhotographers } from "@/lib/services/photos"
 import { Gallery } from "@/components/gallery/gallery"
 import { GalleryHero } from "@/components/gallery/gallery-hero"
 
-// Revalidate the shell periodically; the gallery itself streams live via SWR.
-export const revalidate = 60
+// Events and gallery inventory are database-backed and must not be captured at
+// build time (deploy previews may build before their database is provisioned).
+export const dynamic = "force-dynamic"
 
 export default async function HomePage() {
   const [events, photographers] = await Promise.all([listPublishedEvents(), listPhotographers()])

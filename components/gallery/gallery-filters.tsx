@@ -54,7 +54,7 @@ export function GalleryFilters({
         </div>
 
         <div className="flex gap-3">
-          <Select value={eventId ?? ALL} onValueChange={(v) => onEventChange(v === ALL ? undefined : v)}>
+          <Select value={eventId ?? ALL} onValueChange={(v) => onEventChange(!v || v === ALL ? undefined : v)}>
             <SelectTrigger className="h-11 w-full rounded-xl sm:w-44" aria-label="Filter by event">
               <SelectValue>
                 {(value) => (value === ALL ? "All events" : events.find((e) => e.id === value)?.name)}
@@ -73,7 +73,7 @@ export function GalleryFilters({
           {photographers.length > 0 && (
             <Select
               value={photographer ?? ALL}
-              onValueChange={(v) => onPhotographerChange(v === ALL ? undefined : v)}
+              onValueChange={(v) => onPhotographerChange(!v || v === ALL ? undefined : v)}
             >
               <SelectTrigger className="h-11 w-full rounded-xl sm:w-44" aria-label="Filter by photographer">
                 <SelectValue>{(value) => (value === ALL ? "All photographers" : value)}</SelectValue>

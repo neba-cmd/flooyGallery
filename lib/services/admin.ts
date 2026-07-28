@@ -7,12 +7,15 @@ export type AdminStats = {
   pendingOrders: number
   paidOrders: number
   completedOrders: number
+  cancelledOrders: number
+  totalCustomers: number
+  revenueToday: number
   totalPhotos: number
   totalEvents: number
   revenuePaid: number
   revenuePending: number
   recentOrders: OrderDTO[]
-  topEvents: { id: string; name: string; photoCount: number; orderCount: number }[]
+  topEvents: { id: string; name: string; photoCount: number; orderCount: number; revenue: number }[]
 }
 
 export async function getAdminStats(): Promise<AdminStats> {
@@ -21,10 +24,12 @@ export async function getAdminStats(): Promise<AdminStats> {
     pendingOrders,
     paidOrders,
     completedOrders,
+    cancelledOrders,
     totalPhotos,
     totalEvents,
     paidAgg,
     pendingAgg,
+    todayAgg,
     recent,
     events,
   ] = await Promise.all([
@@ -32,10 +37,18 @@ export async function getAdminStats(): Promise<AdminStats> {
     prisma.order.count({ where: { status: "PENDING_PAYMENT" } }),
     prisma.order.count({ where: { status: "PAID" } }),
     prisma.order.count({ where: { status: "COMPLETED" } }),
+    prisma.order.count({ where: { status: "CANCELLED" } }),
     prisma.photo.count(),
     prisma.event.count(),
     prisma.order.aggregate({ _sum: { totalAmount: true }, where: { status: { in: ["PAID", "COMPLETED"] } } }),
     prisma.order.aggregate({ _sum: { totalAmount: true }, where: { status: "PENDING_PAYMENT" } }),
+    prisma.order.aggregate({
+      _sum: { totalAmount: true },
+      where: {
+        status: { in: ["PAID", "COMPLETED"] },
+        paidAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) },
+      },
+    }),
     prisma.order.findMany({
       orderBy: { createdAt: "desc" },
       take: 8,
@@ -53,17 +66,27 @@ export async function getAdminStats(): Promise<AdminStats> {
     pendingOrders,
     paidOrders,
     completedOrders,
+    cancelledOrders,
+    totalCustomers: new Set(
+      (await prisma.order.findMany({ select: { customerEmail: true, customerPhone: true, customerName: true } }))
+        .map((order) => (order.customerEmail || order.customerPhone || order.customerName).toLowerCase()),
+    ).size,
     totalPhotos,
     totalEvents,
     revenuePaid: paidAgg._sum.totalAmount ?? 0,
     revenuePending: pendingAgg._sum.totalAmount ?? 0,
+    revenueToday: todayAgg._sum.totalAmount ?? 0,
     recentOrders: recent.map(serializeOrder),
-    topEvents: events.map((e) => ({
+    topEvents: await Promise.all(events.map(async (e) => ({
       id: e.id,
       name: e.name,
       photoCount: e._count.photos,
       orderCount: e._count.orders,
-    })),
+      revenue: (await prisma.order.aggregate({
+        _sum: { totalAmount: true },
+        where: { eventId: e.id, status: { in: ["PAID", "COMPLETED"] } },
+      }))._sum.totalAmount ?? 0,
+    }))),
   }
 }
 
@@ -72,6 +95,7 @@ export type AdminOrderFilters = {
   search?: string
   page?: number
   pageSize?: number
+  eventId?: string
 }
 
 export async function listOrders(filters: AdminOrderFilters = {}) {
@@ -80,7 +104,8 @@ export async function listOrders(filters: AdminOrderFilters = {}) {
   const search = filters.search?.trim()
 
   const where = {
-    ...(filters.status ? { status: filters.status } : {}),
+      ...(filters.status ? { status: filters.status } : {}),
+      ...(filters.eventId ? { eventId: filters.eventId } : {}),
     ...(search
       ? {
           OR: [

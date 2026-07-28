@@ -25,13 +25,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Load persisted selection on mount.
   useEffect(() => {
+    let saved: CartItem[] = []
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
-      if (raw) setItems(JSON.parse(raw) as CartItem[])
+      const parsed: unknown = raw ? JSON.parse(raw) : []
+      if (Array.isArray(parsed)) {
+        saved = parsed.filter((item): item is CartItem =>
+          typeof item === "object" && item !== null &&
+          typeof (item as Partial<CartItem>).photoId === "string" &&
+          typeof (item as Partial<CartItem>).price === "number",
+        )
+      }
     } catch {
       // ignore malformed storage
     }
-    setHydrated(true)
+    queueMicrotask(() => {
+      setItems(saved)
+      setHydrated(true)
+    })
   }, [])
 
   // Persist on change (after hydration to avoid clobbering).

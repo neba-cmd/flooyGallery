@@ -4,12 +4,17 @@ import { hashPassword } from "better-auth/crypto"
 import { PrismaPg } from "@prisma/adapter-pg"
 import { PrismaClient } from "../lib/generated/prisma/client.js"
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL,
+})
 const prisma = new PrismaClient({ adapter })
 
 async function main() {
-  const email = process.env.SEED_ADMIN_EMAIL ?? "admin@flooy.co.uk"
-  const password = process.env.SEED_ADMIN_PASSWORD ?? "flooyadmin123"
+  const email = process.env.SEED_ADMIN_EMAIL
+  const password = process.env.SEED_ADMIN_PASSWORD
+  if (!email || !password || password.length < 8) {
+    throw new Error("Set SEED_ADMIN_EMAIL and a SEED_ADMIN_PASSWORD of at least 8 characters")
+  }
   const name = "Flooy Admin"
 
   const existing = await prisma.user.findUnique({ where: { email } })
@@ -39,7 +44,7 @@ async function main() {
     },
   })
 
-  console.log(`Created admin: ${email} / ${password}`)
+  console.log(`Created admin: ${email}`)
 }
 
 main()

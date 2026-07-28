@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db"
 import { generateOrderNumber } from "@/lib/order-number"
 import { serializeOrder, effectivePrice } from "@/lib/serialize"
-import { createDownloadUrl } from "@/lib/storage/r2"
+import { createDownloadUrl, objectExists } from "@/lib/storage/r2"
 import type { OrderDTO } from "@/types"
 import type { OrderStatus } from "@/lib/generated/prisma/client"
 
@@ -31,6 +31,12 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderDTO> {
   })
 
   if (photos.length === 0) throw new Error("None of the selected photos are available")
+  if (photos.length !== photoIds.length) {
+    throw new Error("One or more selected photos are no longer available")
+  }
+  if (new Set(photos.map((photo) => photo.eventId)).size !== 1) {
+    throw new Error("Photos from different events must be ordered separately")
+  }
 
   const items = photos.map((p) => ({
     photoId: p.id,
@@ -102,10 +108,33 @@ export async function listOrders(options?: {
 }
 
 export async function updateOrderStatus(orderId: string, status: OrderStatus): Promise<OrderDTO> {
+  const current = await prisma.order.findUnique({ where: { id: orderId }, select: { status: true } })
+  if (!current) throw new Error("Order not found")
+  const allowed: Record<OrderStatus, OrderStatus[]> = {
+    PENDING_PAYMENT: ["PAID", "CANCELLED"],
+    PAID: ["COMPLETED", "CANCELLED"],
+    COMPLETED: ["PAID"],
+    CANCELLED: ["PENDING_PAYMENT"],
+  }
+  if (current.status !== status && !allowed[current.status].includes(status)) {
+    throw new Error(`Cannot change an order from ${current.status} to ${status}`)
+  }
   const timestamps: Record<string, Date | null> = {}
-  if (status === "PAID") timestamps.paidAt = new Date()
-  if (status === "COMPLETED") timestamps.completedAt = new Date()
+  if (status === "PAID") {
+    timestamps.paidAt = new Date()
+    timestamps.completedAt = null
+    timestamps.cancelledAt = null
+  }
+  if (status === "COMPLETED") {
+    timestamps.completedAt = new Date()
+    timestamps.cancelledAt = null
+  }
   if (status === "CANCELLED") timestamps.cancelledAt = new Date()
+  if (status === "PENDING_PAYMENT") {
+    timestamps.paidAt = null
+    timestamps.completedAt = null
+    timestamps.cancelledAt = null
+  }
 
   const order = await prisma.order.update({
     where: { id: orderId },
@@ -137,6 +166,9 @@ export async function getSignedDownloadUrl(orderNumber: string, itemId: string):
     include: { photo: { select: { originalKey: true, filename: true } } },
   })
   if (!item) throw new Error("Download not available for this order")
+  if (!(await objectExists(item.photo.originalKey))) {
+    throw new Error("The original file is temporarily unavailable")
+  }
 
   return createDownloadUrl(item.photo.originalKey, item.photo.filename, DOWNLOAD_TTL_SECONDS)
 }
