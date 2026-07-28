@@ -35,8 +35,10 @@ export async function GET(request: Request) {
       dateFrom: dateFrom ? new Date(dateFrom) : undefined,
       dateTo: dateTo ? new Date(dateTo) : undefined,
     })
-  } catch {
-    console.error("[photos] Gallery query failed")
+  } catch (error) {
+    // Keep the public response generic, but retain the real Prisma/driver
+    // exception in runtime logs so production failures remain diagnosable.
+    console.error("[photos] Gallery query failed", error)
     return NextResponse.json({ error: "Gallery is temporarily unavailable" }, { status: 503 })
   }
 
