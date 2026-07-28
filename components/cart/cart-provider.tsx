@@ -51,7 +51,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
     } catch {
-      // storage may be unavailable (private mode); selection stays in memory
+      // storage or  may be unavailable (private mode); selection stays in memory
     }
   }, [items, hydrated])
 
