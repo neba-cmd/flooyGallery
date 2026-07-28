@@ -12,6 +12,28 @@ import { Label } from "@/components/ui/label"
 import { formatPrice } from "@/lib/format"
 import { SafeImage } from "@/components/safe-image"
 
+const COUNTRY_CODES = [
+  ["ET", "Ethiopia", "+251"],
+  ["IT", "Italy", "+39"],
+  ["GB", "United Kingdom", "+44"],
+  ["US", "United States / Canada", "+1"],
+  ["FR", "France", "+33"],
+  ["DE", "Germany", "+49"],
+  ["ES", "Spain", "+34"],
+  ["NL", "Netherlands", "+31"],
+  ["BE", "Belgium", "+32"],
+  ["CH", "Switzerland", "+41"],
+  ["SE", "Sweden", "+46"],
+  ["NO", "Norway", "+47"],
+  ["DK", "Denmark", "+45"],
+  ["FI", "Finland", "+358"],
+  ["IE", "Ireland", "+353"],
+  ["AE", "United Arab Emirates", "+971"],
+  ["SA", "Saudi Arabia", "+966"],
+  ["QA", "Qatar", "+974"],
+  ["AU", "Australia", "+61"],
+] as const
+
 export function CheckoutView() {
   const router = useRouter()
   const { items, total, count, clear } = useCart()
@@ -38,7 +60,9 @@ export function CheckoutView() {
     const form = new FormData(e.currentTarget)
     const name = String(form.get("name") ?? "").trim()
     const email = String(form.get("email") ?? "").trim()
-    const phone = String(form.get("phone") ?? "").trim()
+    const localPhone = String(form.get("phone") ?? "").trim()
+    const countryCode = String(form.get("countryCode") ?? "+251")
+    const phone = localPhone ? `${countryCode} ${localPhone}` : ""
 
     if (name.length < 2) {
       setErrors({ name: "Please enter your full name" })
@@ -48,8 +72,9 @@ export function CheckoutView() {
       setErrors({ contact: "Enter an email address or phone number so you can securely retrieve the order." })
       return
     }
-    if (phone && phone.replace(/\D/g, "").length < 7) {
-      setErrors({ contact: "Enter a valid phone number." })
+    const phoneDigits = phone.replace(/\D/g, "")
+    if (phone && (phoneDigits.length < 8 || phoneDigits.length > 15)) {
+      setErrors({ contact: "Enter a valid international phone number." })
       return
     }
 
@@ -109,7 +134,23 @@ export function CheckoutView() {
               <Label htmlFor="phone">
                 Phone
               </Label>
-              <Input id="phone" name="phone" type="tel" autoComplete="tel" placeholder="07123 456789" />
+              <div className="grid grid-cols-[8.5rem_1fr] gap-2">
+                <select
+                  id="countryCode"
+                  name="countryCode"
+                  defaultValue="+251"
+                  aria-label="Country calling code"
+                  className="h-8 rounded-lg border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                >
+                  {COUNTRY_CODES.map(([country, , code]) => (
+                    <option key={country} value={code}>
+                      {country} {code}
+                    </option>
+                  ))}
+                </select>
+                <Input id="phone" name="phone" type="tel" autoComplete="tel-national" placeholder="Phone number" />
+              </div>
+              <p className="text-xs text-muted-foreground">Select your country code, then enter your phone number.</p>
               {errors.contact && <p role="alert" className="text-xs text-destructive">{errors.contact}</p>}
             </div>
           </div>

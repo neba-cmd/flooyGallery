@@ -9,6 +9,7 @@ const querySchema = z.object({
   eventId: z.string().optional(),
   search: z.string().max(120).optional(),
   photographer: z.string().max(120).optional(),
+  dayOfWeek: z.coerce.number().int().min(1).max(7).optional(),
   dateFrom: z.string().datetime().optional(),
   dateTo: z.string().datetime().optional(),
   cursor: z.string().optional(),

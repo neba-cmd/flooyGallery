@@ -7,6 +7,7 @@ export type PhotoQuery = {
   eventId?: string
   search?: string
   photographer?: string
+  dayOfWeek?: number
   dateFrom?: Date
   dateTo?: Date
   cursor?: string
@@ -39,6 +40,7 @@ export async function queryPhotos(query: PhotoQuery): Promise<PhotoPage> {
 
   if (query.eventId) where.eventId = query.eventId
   if (query.photographer) where.photographer = { equals: query.photographer, mode: "insensitive" }
+  if (query.dayOfWeek) where.dayOfWeek = query.dayOfWeek
 
   if (query.dateFrom || query.dateTo) {
     where.takenAt = {}

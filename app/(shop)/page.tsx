@@ -1,6 +1,5 @@
 import { Suspense } from "react"
 import { listPublishedEvents } from "@/lib/services/events"
-import { listPhotographers } from "@/lib/services/photos"
 import { Gallery } from "@/components/gallery/gallery"
 import { GalleryHero } from "@/components/gallery/gallery-hero"
 
@@ -9,15 +8,14 @@ import { GalleryHero } from "@/components/gallery/gallery-hero"
 export const dynamic = "force-dynamic"
 
 export default async function HomePage() {
-  const [events, photographers] = await Promise.all([listPublishedEvents(), listPhotographers()])
-  const totalPhotos = events.reduce((sum, e) => sum + (e.photoCount ?? 0), 0)
+  const events = await listPublishedEvents()
 
   return (
     <main>
-      <GalleryHero eventCount={events.length} photoCount={totalPhotos} />
+      <GalleryHero />
       <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6">
         <Suspense>
-          <Gallery events={events} photographers={photographers} />
+          <Gallery events={events} />
         </Suspense>
       </section>
     </main>

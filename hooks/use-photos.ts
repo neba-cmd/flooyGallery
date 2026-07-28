@@ -7,6 +7,7 @@ export type PhotoFilters = {
   eventId?: string
   search?: string
   photographer?: string
+  dayOfWeek?: number
   dateFrom?: string
   dateTo?: string
 }
@@ -22,6 +23,7 @@ function buildUrl(filters: PhotoFilters, cursor: string | null) {
   if (filters.eventId) params.set("eventId", filters.eventId)
   if (filters.search) params.set("search", filters.search)
   if (filters.photographer) params.set("photographer", filters.photographer)
+  if (filters.dayOfWeek) params.set("dayOfWeek", String(filters.dayOfWeek))
   if (filters.dateFrom) params.set("dateFrom", filters.dateFrom)
   if (filters.dateTo) params.set("dateTo", filters.dateTo)
   if (cursor) params.set("cursor", cursor)

@@ -29,6 +29,7 @@ function detectedImageType(bytes: Uint8Array): string | null {
 const schema = z.object({
   eventId: z.string().cuid(),
   photographer: z.string().trim().min(2).max(120),
+  dayOfWeek: z.number().int().min(1).max(7),
   filename: z.string().trim().min(1).max(240),
   originalKey: z.string().max(500),
   previewKey: z.string().max(500),
@@ -82,7 +83,7 @@ export async function POST(request: Request) {
       if (existing) return existing
       const max = await tx.photo.aggregate({ where: { eventId: data.eventId }, _max: { photoNumber: true } })
       return tx.photo.create({ data: {
-        eventId: data.eventId, photographer: data.photographer, filename: data.filename,
+        eventId: data.eventId, photographer: data.photographer, dayOfWeek: data.dayOfWeek, filename: data.filename,
         originalKey: data.originalKey, previewKey: data.previewKey, previewUrl: resolvePreviewUrl(data.previewKey),
         width: data.width, height: data.height, fileSize: data.fileSize,
         photoNumber: (max._max.photoNumber ?? 0) + 1,

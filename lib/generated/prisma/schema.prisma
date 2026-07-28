@@ -28,7 +28,7 @@ model Event {
   location     String?
   description  String?
   date         DateTime?
-  // Default price (in pence) for photos in this event; individual photos may override.
+  // Default price (in euro cents) for photos in this event; individual photos may override.
   defaultPrice Int       @default(1500)
   published    Boolean   @default(true)
   createdAt    DateTime  @default(now())
@@ -50,6 +50,8 @@ model Photo {
   // Human-friendly sequential number shown to customers (e.g. photo number).
   photoNumber  Int?
   photographer String?
+  // ISO weekday selected at upload time: Monday=1 ... Sunday=7.
+  dayOfWeek    Int?
 
   // Storage keys (R2 object keys, never exposed directly to customers)
   previewKey  String @unique // events/<eventId>/previews/<file>
@@ -60,7 +62,7 @@ model Photo {
   width    Int?
   height   Int?
   fileSize Int? // bytes (original)
-  // Price override in pence. Falls back to event.defaultPrice when null.
+  // Price override in euro cents. Falls back to event.defaultPrice when null.
   price    Int?
 
   takenAt   DateTime?
@@ -72,6 +74,7 @@ model Photo {
   @@index([eventId])
   @@index([filename])
   @@index([photographer])
+  @@index([dayOfWeek])
   @@index([createdAt])
 }
 
@@ -87,7 +90,7 @@ model Order {
   customerPhone String?
 
   status      OrderStatus @default(PENDING_PAYMENT)
-  // Snapshot of total in pence at time of order.
+  // Snapshot of total in euro cents at time of order.
   totalAmount Int         @default(0)
 
   paidAt      DateTime?
@@ -114,7 +117,7 @@ model OrderItem {
   photoId String
   photo   Photo  @relation(fields: [photoId], references: [id], onDelete: Restrict)
 
-  // Price snapshot (pence) captured at checkout time.
+  // Price snapshot (euro cents) captured at checkout time.
   unitPrice Int
 
   createdAt DateTime @default(now())

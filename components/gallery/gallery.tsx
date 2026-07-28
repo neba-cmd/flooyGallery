@@ -12,21 +12,20 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 type GalleryProps = {
   events: EventDTO[]
-  photographers: string[]
   initialEventId?: string
 }
 
-export function Gallery({ events, photographers, initialEventId }: GalleryProps) {
+export function Gallery({ events, initialEventId }: GalleryProps) {
   const [search, setSearch] = useState("")
   const [eventId, setEventId] = useState<string | undefined>(initialEventId)
-  const [photographer, setPhotographer] = useState<string | undefined>(undefined)
+  const [dayOfWeek, setDayOfWeek] = useState<number | undefined>(undefined)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   const debouncedSearch = useDebounced(search, 350)
 
   const filters: PhotoFilters = useMemo(
-    () => ({ search: debouncedSearch || undefined, eventId, photographer }),
-    [debouncedSearch, eventId, photographer],
+    () => ({ search: debouncedSearch || undefined, eventId, dayOfWeek }),
+    [debouncedSearch, eventId, dayOfWeek],
   )
 
   const { photos, total, error, isLoading, isLoadingMore, reachedEnd, loadMore } = usePhotos(filters)
@@ -61,10 +60,9 @@ export function Gallery({ events, photographers, initialEventId }: GalleryProps)
         onSearchChange={setSearch}
         eventId={eventId}
         onEventChange={setEventId}
-        photographer={photographer}
-        onPhotographerChange={setPhotographer}
+        dayOfWeek={dayOfWeek}
+        onDayChange={setDayOfWeek}
         events={events}
-        photographers={photographers}
         resultCount={total}
       />
 

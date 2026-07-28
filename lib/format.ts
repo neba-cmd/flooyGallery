@@ -1,10 +1,10 @@
-/** Formatting helpers. Prices are stored as integer pence to avoid float bugs. */
+/** Formatting helpers. Prices are stored as integer cents to avoid float bugs. */
 
-export function formatPrice(pence: number, currency = "GBP"): string {
-  return new Intl.NumberFormat("en-GB", {
+export function formatPrice(cents: number, currency = "EUR"): string {
+  return new Intl.NumberFormat("en-IE", {
     style: "currency",
     currency,
-  }).format(pence / 100)
+  }).format(cents / 100)
 }
 
 export function formatDate(date: Date | string | null | undefined): string {

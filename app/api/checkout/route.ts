@@ -12,10 +12,11 @@ import { toPublicOrder } from "@/lib/serialize"
 const checkoutSchema = z.object({
   name: z.string().trim().min(2, "Please enter your name").max(120),
   email: z.string().trim().email("Invalid email").max(200).optional().or(z.literal("")),
-  phone: z.string().trim().max(40).refine(
-    (value) => !value || value.replace(/\D/g, "").length >= 7,
-    "Enter a valid phone number",
-  ).optional().or(z.literal("")),
+  phone: z.string().trim().max(40).refine((value) => {
+    if (!value) return true
+    const digits = value.replace(/\D/g, "")
+    return value.startsWith("+") && digits.length >= 8 && digits.length <= 15
+  }, "Enter a valid international phone number").optional().or(z.literal("")),
   photoIds: z.array(z.string().min(1)).min(1, "Select at least one photo").max(500),
   checkoutKey: z.string().uuid().optional(),
 }).refine((value) => Boolean(value.email || value.phone), {

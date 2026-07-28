@@ -2907,6 +2907,7 @@ export namespace Prisma {
 
   export type PhotoAvgAggregateOutputType = {
     photoNumber: number | null
+    dayOfWeek: number | null
     width: number | null
     height: number | null
     fileSize: number | null
@@ -2915,6 +2916,7 @@ export namespace Prisma {
 
   export type PhotoSumAggregateOutputType = {
     photoNumber: number | null
+    dayOfWeek: number | null
     width: number | null
     height: number | null
     fileSize: number | null
@@ -2927,6 +2929,7 @@ export namespace Prisma {
     filename: string | null
     photoNumber: number | null
     photographer: string | null
+    dayOfWeek: number | null
     previewKey: string | null
     originalKey: string | null
     previewUrl: string | null
@@ -2944,6 +2947,7 @@ export namespace Prisma {
     filename: string | null
     photoNumber: number | null
     photographer: string | null
+    dayOfWeek: number | null
     previewKey: string | null
     originalKey: string | null
     previewUrl: string | null
@@ -2961,6 +2965,7 @@ export namespace Prisma {
     filename: number
     photoNumber: number
     photographer: number
+    dayOfWeek: number
     previewKey: number
     originalKey: number
     previewUrl: number
@@ -2976,6 +2981,7 @@ export namespace Prisma {
 
   export type PhotoAvgAggregateInputType = {
     photoNumber?: true
+    dayOfWeek?: true
     width?: true
     height?: true
     fileSize?: true
@@ -2984,6 +2990,7 @@ export namespace Prisma {
 
   export type PhotoSumAggregateInputType = {
     photoNumber?: true
+    dayOfWeek?: true
     width?: true
     height?: true
     fileSize?: true
@@ -2996,6 +3003,7 @@ export namespace Prisma {
     filename?: true
     photoNumber?: true
     photographer?: true
+    dayOfWeek?: true
     previewKey?: true
     originalKey?: true
     previewUrl?: true
@@ -3013,6 +3021,7 @@ export namespace Prisma {
     filename?: true
     photoNumber?: true
     photographer?: true
+    dayOfWeek?: true
     previewKey?: true
     originalKey?: true
     previewUrl?: true
@@ -3030,6 +3039,7 @@ export namespace Prisma {
     filename?: true
     photoNumber?: true
     photographer?: true
+    dayOfWeek?: true
     previewKey?: true
     originalKey?: true
     previewUrl?: true
@@ -3134,6 +3144,7 @@ export namespace Prisma {
     filename: string
     photoNumber: number | null
     photographer: string | null
+    dayOfWeek: number | null
     previewKey: string
     originalKey: string
     previewUrl: string
@@ -3170,6 +3181,7 @@ export namespace Prisma {
     filename?: boolean
     photoNumber?: boolean
     photographer?: boolean
+    dayOfWeek?: boolean
     previewKey?: boolean
     originalKey?: boolean
     previewUrl?: boolean
@@ -3190,6 +3202,7 @@ export namespace Prisma {
     filename?: boolean
     photoNumber?: boolean
     photographer?: boolean
+    dayOfWeek?: boolean
     previewKey?: boolean
     originalKey?: boolean
     previewUrl?: boolean
@@ -3208,6 +3221,7 @@ export namespace Prisma {
     filename?: boolean
     photoNumber?: boolean
     photographer?: boolean
+    dayOfWeek?: boolean
     previewKey?: boolean
     originalKey?: boolean
     previewUrl?: boolean
@@ -3226,6 +3240,7 @@ export namespace Prisma {
     filename?: boolean
     photoNumber?: boolean
     photographer?: boolean
+    dayOfWeek?: boolean
     previewKey?: boolean
     originalKey?: boolean
     previewUrl?: boolean
@@ -3237,7 +3252,7 @@ export namespace Prisma {
     createdAt?: boolean
   }
 
-  export type PhotoOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "eventId" | "filename" | "photoNumber" | "photographer" | "previewKey" | "originalKey" | "previewUrl" | "width" | "height" | "fileSize" | "price" | "takenAt" | "createdAt", ExtArgs["result"]["photo"]>
+  export type PhotoOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "eventId" | "filename" | "photoNumber" | "photographer" | "dayOfWeek" | "previewKey" | "originalKey" | "previewUrl" | "width" | "height" | "fileSize" | "price" | "takenAt" | "createdAt", ExtArgs["result"]["photo"]>
   export type PhotoInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     event?: boolean | EventDefaultArgs<ExtArgs>
     orderItems?: boolean | Photo$orderItemsArgs<ExtArgs>
@@ -3262,6 +3277,7 @@ export namespace Prisma {
       filename: string
       photoNumber: number | null
       photographer: string | null
+      dayOfWeek: number | null
       previewKey: string
       originalKey: string
       previewUrl: string
@@ -3701,6 +3717,7 @@ export namespace Prisma {
     readonly filename: FieldRef<"Photo", 'String'>
     readonly photoNumber: FieldRef<"Photo", 'Int'>
     readonly photographer: FieldRef<"Photo", 'String'>
+    readonly dayOfWeek: FieldRef<"Photo", 'Int'>
     readonly previewKey: FieldRef<"Photo", 'String'>
     readonly originalKey: FieldRef<"Photo", 'String'>
     readonly previewUrl: FieldRef<"Photo", 'String'>
@@ -10981,6 +10998,7 @@ export namespace Prisma {
     filename: 'filename',
     photoNumber: 'photoNumber',
     photographer: 'photographer',
+    dayOfWeek: 'dayOfWeek',
     previewKey: 'previewKey',
     originalKey: 'originalKey',
     previewUrl: 'previewUrl',
@@ -11288,6 +11306,7 @@ export namespace Prisma {
     filename?: StringFilter<"Photo"> | string
     photoNumber?: IntNullableFilter<"Photo"> | number | null
     photographer?: StringNullableFilter<"Photo"> | string | null
+    dayOfWeek?: IntNullableFilter<"Photo"> | number | null
     previewKey?: StringFilter<"Photo"> | string
     originalKey?: StringFilter<"Photo"> | string
     previewUrl?: StringFilter<"Photo"> | string
@@ -11307,6 +11326,7 @@ export namespace Prisma {
     filename?: SortOrder
     photoNumber?: SortOrderInput | SortOrder
     photographer?: SortOrderInput | SortOrder
+    dayOfWeek?: SortOrderInput | SortOrder
     previewKey?: SortOrder
     originalKey?: SortOrder
     previewUrl?: SortOrder
@@ -11332,6 +11352,7 @@ export namespace Prisma {
     filename?: StringFilter<"Photo"> | string
     photoNumber?: IntNullableFilter<"Photo"> | number | null
     photographer?: StringNullableFilter<"Photo"> | string | null
+    dayOfWeek?: IntNullableFilter<"Photo"> | number | null
     previewUrl?: StringFilter<"Photo"> | string
     width?: IntNullableFilter<"Photo"> | number | null
     height?: IntNullableFilter<"Photo"> | number | null
@@ -11349,6 +11370,7 @@ export namespace Prisma {
     filename?: SortOrder
     photoNumber?: SortOrderInput | SortOrder
     photographer?: SortOrderInput | SortOrder
+    dayOfWeek?: SortOrderInput | SortOrder
     previewKey?: SortOrder
     originalKey?: SortOrder
     previewUrl?: SortOrder
@@ -11374,6 +11396,7 @@ export namespace Prisma {
     filename?: StringWithAggregatesFilter<"Photo"> | string
     photoNumber?: IntNullableWithAggregatesFilter<"Photo"> | number | null
     photographer?: StringNullableWithAggregatesFilter<"Photo"> | string | null
+    dayOfWeek?: IntNullableWithAggregatesFilter<"Photo"> | number | null
     previewKey?: StringWithAggregatesFilter<"Photo"> | string
     originalKey?: StringWithAggregatesFilter<"Photo"> | string
     previewUrl?: StringWithAggregatesFilter<"Photo"> | string
@@ -11951,6 +11974,7 @@ export namespace Prisma {
     filename: string
     photoNumber?: number | null
     photographer?: string | null
+    dayOfWeek?: number | null
     previewKey: string
     originalKey: string
     previewUrl: string
@@ -11970,6 +11994,7 @@ export namespace Prisma {
     filename: string
     photoNumber?: number | null
     photographer?: string | null
+    dayOfWeek?: number | null
     previewKey: string
     originalKey: string
     previewUrl: string
@@ -11987,6 +12012,7 @@ export namespace Prisma {
     filename?: StringFieldUpdateOperationsInput | string
     photoNumber?: NullableIntFieldUpdateOperationsInput | number | null
     photographer?: NullableStringFieldUpdateOperationsInput | string | null
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
     previewKey?: StringFieldUpdateOperationsInput | string
     originalKey?: StringFieldUpdateOperationsInput | string
     previewUrl?: StringFieldUpdateOperationsInput | string
@@ -12006,6 +12032,7 @@ export namespace Prisma {
     filename?: StringFieldUpdateOperationsInput | string
     photoNumber?: NullableIntFieldUpdateOperationsInput | number | null
     photographer?: NullableStringFieldUpdateOperationsInput | string | null
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
     previewKey?: StringFieldUpdateOperationsInput | string
     originalKey?: StringFieldUpdateOperationsInput | string
     previewUrl?: StringFieldUpdateOperationsInput | string
@@ -12024,6 +12051,7 @@ export namespace Prisma {
     filename: string
     photoNumber?: number | null
     photographer?: string | null
+    dayOfWeek?: number | null
     previewKey: string
     originalKey: string
     previewUrl: string
@@ -12040,6 +12068,7 @@ export namespace Prisma {
     filename?: StringFieldUpdateOperationsInput | string
     photoNumber?: NullableIntFieldUpdateOperationsInput | number | null
     photographer?: NullableStringFieldUpdateOperationsInput | string | null
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
     previewKey?: StringFieldUpdateOperationsInput | string
     originalKey?: StringFieldUpdateOperationsInput | string
     previewUrl?: StringFieldUpdateOperationsInput | string
@@ -12057,6 +12086,7 @@ export namespace Prisma {
     filename?: StringFieldUpdateOperationsInput | string
     photoNumber?: NullableIntFieldUpdateOperationsInput | number | null
     photographer?: NullableStringFieldUpdateOperationsInput | string | null
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
     previewKey?: StringFieldUpdateOperationsInput | string
     originalKey?: StringFieldUpdateOperationsInput | string
     previewUrl?: StringFieldUpdateOperationsInput | string
@@ -12844,6 +12874,7 @@ export namespace Prisma {
     filename?: SortOrder
     photoNumber?: SortOrder
     photographer?: SortOrder
+    dayOfWeek?: SortOrder
     previewKey?: SortOrder
     originalKey?: SortOrder
     previewUrl?: SortOrder
@@ -12857,6 +12888,7 @@ export namespace Prisma {
 
   export type PhotoAvgOrderByAggregateInput = {
     photoNumber?: SortOrder
+    dayOfWeek?: SortOrder
     width?: SortOrder
     height?: SortOrder
     fileSize?: SortOrder
@@ -12869,6 +12901,7 @@ export namespace Prisma {
     filename?: SortOrder
     photoNumber?: SortOrder
     photographer?: SortOrder
+    dayOfWeek?: SortOrder
     previewKey?: SortOrder
     originalKey?: SortOrder
     previewUrl?: SortOrder
@@ -12886,6 +12919,7 @@ export namespace Prisma {
     filename?: SortOrder
     photoNumber?: SortOrder
     photographer?: SortOrder
+    dayOfWeek?: SortOrder
     previewKey?: SortOrder
     originalKey?: SortOrder
     previewUrl?: SortOrder
@@ -12899,6 +12933,7 @@ export namespace Prisma {
 
   export type PhotoSumOrderByAggregateInput = {
     photoNumber?: SortOrder
+    dayOfWeek?: SortOrder
     width?: SortOrder
     height?: SortOrder
     fileSize?: SortOrder
@@ -13821,6 +13856,7 @@ export namespace Prisma {
     filename: string
     photoNumber?: number | null
     photographer?: string | null
+    dayOfWeek?: number | null
     previewKey: string
     originalKey: string
     previewUrl: string
@@ -13838,6 +13874,7 @@ export namespace Prisma {
     filename: string
     photoNumber?: number | null
     photographer?: string | null
+    dayOfWeek?: number | null
     previewKey: string
     originalKey: string
     previewUrl: string
@@ -13929,6 +13966,7 @@ export namespace Prisma {
     filename?: StringFilter<"Photo"> | string
     photoNumber?: IntNullableFilter<"Photo"> | number | null
     photographer?: StringNullableFilter<"Photo"> | string | null
+    dayOfWeek?: IntNullableFilter<"Photo"> | number | null
     previewKey?: StringFilter<"Photo"> | string
     originalKey?: StringFilter<"Photo"> | string
     previewUrl?: StringFilter<"Photo"> | string
@@ -14255,6 +14293,7 @@ export namespace Prisma {
     filename: string
     photoNumber?: number | null
     photographer?: string | null
+    dayOfWeek?: number | null
     previewKey: string
     originalKey: string
     previewUrl: string
@@ -14273,6 +14312,7 @@ export namespace Prisma {
     filename: string
     photoNumber?: number | null
     photographer?: string | null
+    dayOfWeek?: number | null
     previewKey: string
     originalKey: string
     previewUrl: string
@@ -14350,6 +14390,7 @@ export namespace Prisma {
     filename?: StringFieldUpdateOperationsInput | string
     photoNumber?: NullableIntFieldUpdateOperationsInput | number | null
     photographer?: NullableStringFieldUpdateOperationsInput | string | null
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
     previewKey?: StringFieldUpdateOperationsInput | string
     originalKey?: StringFieldUpdateOperationsInput | string
     previewUrl?: StringFieldUpdateOperationsInput | string
@@ -14368,6 +14409,7 @@ export namespace Prisma {
     filename?: StringFieldUpdateOperationsInput | string
     photoNumber?: NullableIntFieldUpdateOperationsInput | number | null
     photographer?: NullableStringFieldUpdateOperationsInput | string | null
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
     previewKey?: StringFieldUpdateOperationsInput | string
     originalKey?: StringFieldUpdateOperationsInput | string
     previewUrl?: StringFieldUpdateOperationsInput | string
@@ -14647,6 +14689,7 @@ export namespace Prisma {
     filename: string
     photoNumber?: number | null
     photographer?: string | null
+    dayOfWeek?: number | null
     previewKey: string
     originalKey: string
     previewUrl: string
@@ -14679,6 +14722,7 @@ export namespace Prisma {
     filename?: StringFieldUpdateOperationsInput | string
     photoNumber?: NullableIntFieldUpdateOperationsInput | number | null
     photographer?: NullableStringFieldUpdateOperationsInput | string | null
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
     previewKey?: StringFieldUpdateOperationsInput | string
     originalKey?: StringFieldUpdateOperationsInput | string
     previewUrl?: StringFieldUpdateOperationsInput | string
@@ -14696,6 +14740,7 @@ export namespace Prisma {
     filename?: StringFieldUpdateOperationsInput | string
     photoNumber?: NullableIntFieldUpdateOperationsInput | number | null
     photographer?: NullableStringFieldUpdateOperationsInput | string | null
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
     previewKey?: StringFieldUpdateOperationsInput | string
     originalKey?: StringFieldUpdateOperationsInput | string
     previewUrl?: StringFieldUpdateOperationsInput | string
@@ -14713,6 +14758,7 @@ export namespace Prisma {
     filename?: StringFieldUpdateOperationsInput | string
     photoNumber?: NullableIntFieldUpdateOperationsInput | number | null
     photographer?: NullableStringFieldUpdateOperationsInput | string | null
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
     previewKey?: StringFieldUpdateOperationsInput | string
     originalKey?: StringFieldUpdateOperationsInput | string
     previewUrl?: StringFieldUpdateOperationsInput | string

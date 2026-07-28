@@ -13,16 +13,16 @@ import {
 import { Button } from "@/components/ui/button"
 
 const ALL = "__all__"
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 type GalleryFiltersProps = {
   search: string
   onSearchChange: (value: string) => void
   eventId: string | undefined
   onEventChange: (value: string | undefined) => void
-  photographer: string | undefined
-  onPhotographerChange: (value: string | undefined) => void
+  dayOfWeek: number | undefined
+  onDayChange: (value: number | undefined) => void
   events: EventDTO[]
-  photographers: string[]
   resultCount: number
 }
 
@@ -31,13 +31,12 @@ export function GalleryFilters({
   onSearchChange,
   eventId,
   onEventChange,
-  photographer,
-  onPhotographerChange,
+  dayOfWeek,
+  onDayChange,
   events,
-  photographers,
   resultCount,
 }: GalleryFiltersProps) {
-  const hasFilters = Boolean(search || eventId || photographer)
+  const hasFilters = Boolean(search || eventId || dayOfWeek)
 
   return (
     <div className="flex flex-col gap-3">
@@ -47,7 +46,7 @@ export function GalleryFilters({
           <Input
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search by photo number, filename or photographer…"
+            placeholder="Search by photo number or filename…"
             className="h-11 rounded-xl pl-9"
             aria-label="Search photos"
           />
@@ -70,24 +69,24 @@ export function GalleryFilters({
             </SelectContent>
           </Select>
 
-          {photographers.length > 0 && (
-            <Select
-              value={photographer ?? ALL}
-              onValueChange={(v) => onPhotographerChange(!v || v === ALL ? undefined : v)}
-            >
-              <SelectTrigger className="h-11 w-full rounded-xl sm:w-44" aria-label="Filter by photographer">
-                <SelectValue>{(value) => (value === ALL ? "All photographers" : value)}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ALL}>All photographers</SelectItem>
-                {photographers.map((p) => (
-                  <SelectItem key={p} value={p}>
-                    {p}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          <Select
+            value={dayOfWeek ? String(dayOfWeek) : ALL}
+            onValueChange={(v) => onDayChange(!v || v === ALL ? undefined : Number(v))}
+          >
+            <SelectTrigger className="h-11 w-full rounded-xl sm:w-44" aria-label="Filter by day">
+              <SelectValue>
+                {(value) => (value === ALL ? "All days" : DAYS[Number(value) - 1])}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>All days</SelectItem>
+              {DAYS.map((day, index) => (
+                <SelectItem key={day} value={String(index + 1)}>
+                  {day}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -103,7 +102,7 @@ export function GalleryFilters({
             onClick={() => {
               onSearchChange("")
               onEventChange(undefined)
-              onPhotographerChange(undefined)
+              onDayChange(undefined)
             }}
           >
             <X className="h-3.5 w-3.5" /> Clear filters
