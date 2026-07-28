@@ -9,7 +9,6 @@ const TYPES = ["image/jpeg","image/png","image/webp"]
 const MAX = 30 * 1024 * 1024
 const MAX_BATCH_FILES = 100
 const UPLOAD_CONCURRENCY = 3
-const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
 
 function loadImage(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve,reject) => { const image=new Image(); const url=URL.createObjectURL(file); image.onload=()=>{URL.revokeObjectURL(url);resolve(image)}; image.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Image could not be read"))}; image.src=url })
@@ -40,7 +39,6 @@ function put(url:string, body:Blob, contentType:string, onProgress:(n:number)=>v
 
 export function PhotoUploader({ events, photographers }: { events:{id:string;name:string}[]; photographers:string[] }) {
   const [eventId,setEventId]=useState(events[0]?.id??""); const [photographer,setPhotographer]=useState(photographers[0]??"")
-  const [dayOfWeek,setDayOfWeek]=useState(1)
   const [uploads,setUploads]=useState<Upload[]>([]); const controllers=useRef(new Map<string,AbortController>())
   const update=(id:string,patch:Partial<Upload>)=>setUploads(items=>items.map(item=>item.id===id?{...item,...patch}:item))
   async function run(item:Upload) {
@@ -56,7 +54,7 @@ export function PhotoUploader({ events, photographers }: { events:{id:string;nam
         put(signed.originalUrl,item.file,item.file.type,n=>{originalProgress=n;reportProgress()},controller.signal),
         put(signed.previewUrl,generated.blob,"image/jpeg",n=>{previewProgress=n;reportProgress()},controller.signal),
       ])
-      const complete=await fetch("/api/admin/uploads/complete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({eventId,photographer,dayOfWeek,filename:item.file.name,originalKey:signed.originalKey,previewKey:signed.previewKey,width:generated.width,height:generated.height,fileSize:item.file.size}),signal:controller.signal})
+      const complete=await fetch("/api/admin/uploads/complete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({eventId,photographer,filename:item.file.name,originalKey:signed.originalKey,previewKey:signed.previewKey,width:generated.width,height:generated.height,fileSize:item.file.size}),signal:controller.signal})
       const result=await complete.json(); if(!complete.ok) throw new Error(result.error??"Could not save upload")
       update(item.id,{status:"complete",progress:100})
     } catch(error) {
@@ -75,7 +73,7 @@ export function PhotoUploader({ events, photographers }: { events:{id:string;nam
     void Promise.all(Array.from({length:Math.min(UPLOAD_CONCURRENCY,valid.length)},worker))
   }
   return <div className="space-y-5">
-    <div className="grid gap-3 sm:grid-cols-3"><label className="text-sm">Event<select value={eventId} onChange={e=>setEventId(e.target.value)} className="mt-1 h-10 w-full rounded-lg border bg-card px-3">{events.map(e=><option key={e.id} value={e.id}>{e.name}</option>)}</select></label><label className="text-sm">Day<select value={dayOfWeek} onChange={e=>setDayOfWeek(Number(e.target.value))} className="mt-1 h-10 w-full rounded-lg border bg-card px-3">{DAYS.map((day,index)=><option key={day} value={index+1}>{day}</option>)}</select></label><label className="text-sm">Photographer<input list="photographers" value={photographer} onChange={e=>setPhotographer(e.target.value)} className="mt-1 h-10 w-full rounded-lg border bg-card px-3"/><datalist id="photographers">{photographers.map(p=><option key={p}>{p}</option>)}</datalist></label></div>
+    <div className="grid gap-3 sm:grid-cols-2"><label className="text-sm">Event<select value={eventId} onChange={e=>setEventId(e.target.value)} className="mt-1 h-10 w-full rounded-lg border bg-card px-3">{events.map(e=><option key={e.id} value={e.id}>{e.name}</option>)}</select></label><label className="text-sm">Photographer<input list="photographers" value={photographer} onChange={e=>setPhotographer(e.target.value)} className="mt-1 h-10 w-full rounded-lg border bg-card px-3"/><datalist id="photographers">{photographers.map(p=><option key={p}>{p}</option>)}</datalist></label></div>
     <label onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();add(e.dataTransfer.files)}} className="block cursor-pointer rounded-2xl border-2 border-dashed p-12 text-center text-sm text-muted-foreground"><input className="sr-only" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={e=>e.target.files&&add(e.target.files)}/>Drop JPEG, PNG or WebP files here, or click to select<br/><span className="text-xs">Maximum 30 MB per file</span></label>
     <div className="space-y-2">{uploads.map(item=><div key={item.id} className="rounded-lg border bg-card p-3"><div className="flex items-center gap-3"><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{item.file.name}</p><p className="text-xs text-muted-foreground">{item.status}{item.error?` · ${item.error}`:""}</p><div className="mt-2 h-1.5 overflow-hidden rounded bg-muted"><div className="h-full bg-primary" style={{width:`${item.progress}%`}}/></div></div>{item.status==="uploading"&&<Button size="sm" variant="ghost" onClick={()=>controllers.current.get(item.id)?.abort()}>Cancel</Button>}{(item.status==="failed"||item.status==="cancelled")&&<Button size="sm" variant="outline" onClick={()=>run({...item,status:"pending",progress:0})}>Retry</Button>}</div></div>)}</div>
   </div>

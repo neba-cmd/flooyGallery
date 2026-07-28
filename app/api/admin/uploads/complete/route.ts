@@ -29,7 +29,6 @@ function detectedImageType(bytes: Uint8Array): string | null {
 const schema = z.object({
   eventId: z.string().cuid(),
   photographer: z.string().trim().min(2).max(120),
-  dayOfWeek: z.number().int().min(1).max(7),
   filename: z.string().trim().min(1).max(240),
   originalKey: z.string().max(500),
   previewKey: z.string().max(500),
@@ -76,6 +75,13 @@ export async function POST(request: Request) {
 
     const photo = await prisma.$transaction(async (tx) => {
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${data.eventId}))`
+      const event = await tx.event.findUnique({
+        where: { id: data.eventId },
+        select: { date: true },
+      })
+      if (!event?.date) throw new Error("The selected event needs a date before photos can be uploaded")
+      const utcDay = event.date.getUTCDay()
+      const dayOfWeek = utcDay === 0 ? 7 : utcDay
       const existing = await tx.photo.findFirst({
         where: { originalKey: data.originalKey, previewKey: data.previewKey },
         select: { id: true, photoNumber: true },
@@ -83,14 +89,27 @@ export async function POST(request: Request) {
       if (existing) return existing
       const max = await tx.photo.aggregate({ where: { eventId: data.eventId }, _max: { photoNumber: true } })
       return tx.photo.create({ data: {
-        eventId: data.eventId, photographer: data.photographer, dayOfWeek: data.dayOfWeek, filename: data.filename,
+        eventId: data.eventId, photographer: data.photographer, dayOfWeek, filename: data.filename,
         originalKey: data.originalKey, previewKey: data.previewKey, previewUrl: resolvePreviewUrl(data.previewKey),
         width: data.width, height: data.height, fileSize: data.fileSize,
         photoNumber: (max._max.photoNumber ?? 0) + 1,
       } })
     })
     return NextResponse.json({ id: photo.id, photoNumber: photo.photoNumber }, { status: 201 })
-  } catch {
-    return NextResponse.json({ error: "Could not save photo metadata" }, { status: 500 })
+  } catch (error) {
+    console.error("[upload] Could not save photo metadata", error)
+    const missingEventDate =
+      error instanceof Error && error.message === "The selected event needs a date before photos can be uploaded"
+    if (missingEventDate) {
+      try {
+        await deleteObjects([data.originalKey, data.previewKey])
+      } catch (cleanupError) {
+        console.error("[upload] Undated event upload cleanup failed", cleanupError)
+      }
+    }
+    return NextResponse.json(
+      { error: missingEventDate ? error.message : "Could not save photo metadata" },
+      { status: missingEventDate ? 400 : 500 },
+    )
   }
 }
