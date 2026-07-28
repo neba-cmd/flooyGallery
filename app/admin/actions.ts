@@ -7,6 +7,8 @@ import type { OrderStatus } from "@/types"
 import { z } from "zod"
 import { prisma } from "@/lib/db"
 import { Prisma } from "@/lib/generated/prisma/client"
+import { deleteObjects } from "@/lib/storage/r2"
+import { isStorageConfigured } from "@/lib/env"
 
 const VALID: OrderStatus[] = ["PENDING_PAYMENT", "PAID", "COMPLETED", "CANCELLED"]
 
@@ -69,4 +71,86 @@ export async function toggleEventAction(id: string, published: boolean) {
   await prisma.event.update({ where: { id }, data: { published } })
   revalidatePath("/admin/events")
   revalidatePath("/")
+}
+
+const idSchema = z.string().cuid()
+const photoIdsSchema = z.array(idSchema).min(1).max(100)
+
+async function removeStoredPhotoFiles(keys: string[]) {
+  if (!keys.length || !isStorageConfigured()) return false
+  try {
+    await deleteObjects(keys)
+    return false
+  } catch (error) {
+    console.error("[admin:delete] Database rows deleted but R2 cleanup failed", error)
+    return true
+  }
+}
+
+export async function deletePhotosAction(input: string[]) {
+  await requireAdmin()
+  const ids = photoIdsSchema.parse(input)
+  const photos = await prisma.photo.findMany({
+    where: { id: { in: ids } },
+    select: {
+      id: true,
+      originalKey: true,
+      previewKey: true,
+      _count: { select: { orderItems: true } },
+    },
+  })
+  if (photos.length !== ids.length) throw new Error("One or more photos no longer exist.")
+
+  const orderedCount = photos.filter((photo) => photo._count.orderItems > 0).length
+  if (orderedCount) {
+    throw new Error(
+      `${orderedCount} selected ${orderedCount === 1 ? "photo is" : "photos are"} attached to an order and cannot be deleted.`,
+    )
+  }
+
+  await prisma.photo.deleteMany({ where: { id: { in: ids } } })
+  const storageCleanupFailed = await removeStoredPhotoFiles(
+    photos.flatMap((photo) => [photo.originalKey, photo.previewKey]),
+  )
+  revalidatePath("/admin/photos")
+  revalidatePath("/admin/events")
+  revalidatePath("/")
+  return { deleted: photos.length, storageCleanupFailed }
+}
+
+export async function deleteEventAction(input: string) {
+  await requireAdmin()
+  const id = idSchema.parse(input)
+  const event = await prisma.event.findUnique({
+    where: { id },
+    select: {
+      name: true,
+      photos: {
+        select: {
+          originalKey: true,
+          previewKey: true,
+          _count: { select: { orderItems: true } },
+        },
+      },
+    },
+  })
+  if (!event) throw new Error("This event no longer exists.")
+
+  const orderedCount = event.photos.filter((photo) => photo._count.orderItems > 0).length
+  if (orderedCount) {
+    throw new Error(
+      `This event contains ${orderedCount} ordered ${orderedCount === 1 ? "photo" : "photos"}. Deactivate it instead to preserve customer orders.`,
+    )
+  }
+
+  // Event deletion cascades to its photos. Historical orders remain and have
+  // their optional event link cleared by the database relation.
+  await prisma.event.delete({ where: { id } })
+  const storageCleanupFailed = await removeStoredPhotoFiles(
+    event.photos.flatMap((photo) => [photo.originalKey, photo.previewKey]),
+  )
+  revalidatePath("/admin/events")
+  revalidatePath("/admin/photos")
+  revalidatePath("/")
+  return { name: event.name, deletedPhotos: event.photos.length, storageCleanupFailed }
 }
