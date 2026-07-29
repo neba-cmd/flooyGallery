@@ -18,21 +18,22 @@ enum OrderStatus {
   PENDING_PAYMENT
   PAID
   COMPLETED
+  REFUNDED
   CANCELLED
 }
 
 model Event {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   name         String
-  slug         String   @unique
+  slug         String    @unique
   location     String?
   description  String?
   date         DateTime?
   // Default price (in euro cents) for photos in this event; individual photos may override.
-  defaultPrice Int      @default(1500)
-  published    Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  defaultPrice Int       @default(1500)
+  published    Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   photos Photo[]
   orders Order[]
@@ -42,36 +43,36 @@ model Event {
 }
 
 model Photo {
-  id           String   @id @default(cuid())
-  eventId      String
-  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  id      String @id @default(cuid())
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   filename     String
   // Human-friendly sequential number shown to customers (e.g. photo number).
   photoNumber  Int?
   photographer String?
   // ISO weekday selected at upload time: Monday=1 ... Sunday=7.
-  dayOfWeek     Int?
+  dayOfWeek    Int?
 
   // Storage keys (R2 object keys, never exposed directly to customers)
-  previewKey   String   @unique // events/<eventId>/previews/<file>
-  originalKey  String   @unique // events/<eventId>/originals/<file>
+  previewKey  String @unique // events/<eventId>/previews/<file>
+  originalKey String @unique // events/<eventId>/originals/<file>
   // Public preview URL (watermarked + compressed). Safe to expose.
-  previewUrl   String
+  previewUrl  String
 
-  width        Int?
-  height       Int?
-  fileSize     Int?     // bytes (original)
+  width    Int?
+  height   Int?
+  fileSize Int? // bytes (original)
   // Price override in euro cents. Falls back to event.defaultPrice when null.
-  price        Int?
+  price    Int?
 
-  takenAt      DateTime?
-  createdAt    DateTime @default(now())
+  takenAt   DateTime?
+  createdAt DateTime  @default(now())
 
-  orderItems   OrderItem[]
+  orderItems OrderItem[]
 
-  @@index([eventId])
   @@unique([eventId, photoNumber])
+  @@index([eventId])
   @@index([filename])
   @@index([photographer])
   @@index([dayOfWeek])
@@ -79,28 +80,31 @@ model Photo {
 }
 
 model Order {
-  id            String      @id @default(cuid())
-  orderNumber   String      @unique // e.g. FLOOY-48372
-  checkoutKey   String?     @unique // client-generated idempotency key
-  eventId       String?
-  event         Event?      @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  id          String  @id @default(cuid())
+  orderNumber String  @unique // e.g. FLOOY-48372
+  checkoutKey String? @unique // client-generated idempotency key
+  eventId     String?
+  event       Event?  @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  productType String  @default("PHOTOS")
+  currency    String  @default("EUR")
 
   customerName  String
   customerEmail String?
   customerPhone String?
 
-  status        OrderStatus @default(PENDING_PAYMENT)
+  status      OrderStatus @default(PENDING_PAYMENT)
   // Snapshot of total in euro cents at time of order.
-  totalAmount   Int         @default(0)
+  totalAmount Int         @default(0)
 
-  paidAt        DateTime?
-  completedAt   DateTime?
-  cancelledAt   DateTime?
+  paidAt      DateTime?
+  completedAt DateTime?
+  refundedAt  DateTime?
+  cancelledAt DateTime?
 
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  items         OrderItem[]
+  items OrderItem[]
 
   @@index([orderNumber])
   @@index([status])
@@ -111,11 +115,11 @@ model Order {
 }
 
 model OrderItem {
-  id        String @id @default(cuid())
-  orderId   String
-  order     Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  photoId   String
-  photo     Photo  @relation(fields: [photoId], references: [id], onDelete: Restrict)
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  photoId String
+  photo   Photo  @relation(fields: [photoId], references: [id], onDelete: Restrict)
 
   // Price snapshot (euro cents) captured at checkout time.
   unitPrice Int
@@ -132,14 +136,14 @@ model OrderItem {
 // ----------------------------------------------------------------------------
 
 model User {
-  id            String    @id
+  id            String   @id
   name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
+  email         String   @unique
+  emailVerified Boolean  @default(false)
   image         String?
-  role          String    @default("admin")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  role          String   @default("admin")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   sessions Session[]
   accounts Account[]
@@ -158,9 +162,9 @@ model Session {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("session")
   @@index([userId])
   @@index([expiresAt])
+  @@map("session")
 }
 
 model Account {
@@ -179,9 +183,9 @@ model Account {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
-  @@map("account")
   @@unique([providerId, accountId])
   @@index([userId])
+  @@map("account")
 }
 
 model Verification {
@@ -192,7 +196,7 @@ model Verification {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  @@map("verification")
   @@index([identifier])
   @@index([expiresAt])
+  @@map("verification")
 }

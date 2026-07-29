@@ -1,28 +1,32 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, Trash2, ImageOff } from "lucide-react"
+import { ArrowRight, Trash2, ImageOff, Users, Check } from "lucide-react"
 import { useCart } from "@/components/cart/cart-provider"
 import { Button } from "@/components/ui/button"
 import { formatPrice } from "@/lib/format"
 import { SafeImage } from "@/components/safe-image"
+import { PricingSummary } from "@/components/checkout/pricing-summary"
 
 export function CartView() {
-  const { items, removeItem, clear, total, count } = useCart()
+  const { items, removeItem, clear, total, originalTotal, discount, bundleCount, count } = useCart()
 
   if (count === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-3xl border border-border bg-card px-6 py-20 text-center">
-        <div className="mb-5 flex size-14 items-center justify-center rounded-2xl bg-muted">
-          <ImageOff className="size-6 text-muted-foreground" />
+      <div className="space-y-6">
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-border bg-card px-6 py-16 text-center">
+          <div className="mb-5 flex size-14 items-center justify-center rounded-2xl bg-muted">
+            <ImageOff className="size-6 text-muted-foreground" />
+          </div>
+          <h1 className="text-xl font-semibold text-balance">Your selection is empty</h1>
+          <p className="mt-2 max-w-sm text-pretty text-sm text-muted-foreground">
+            Browse the gallery and tap Add on any photo to build your selection.
+          </p>
+          <Button className="mt-6 rounded-full" render={<Link href="/" />}>
+            Browse photos
+          </Button>
         </div>
-        <h1 className="text-xl font-semibold text-balance">Your selection is empty</h1>
-        <p className="mt-2 max-w-sm text-pretty text-sm text-muted-foreground">
-          Browse the event gallery and tap the plus icon on any photo to add it to your selection.
-        </p>
-        <Button className="mt-6 rounded-full" render={<Link href="/" />}>
-          Browse photos
-        </Button>
+        <TeamPackageCard />
       </div>
     )
   }
@@ -87,16 +91,15 @@ export function CartView() {
       <aside className="lg:sticky lg:top-24 lg:self-start">
         <div className="rounded-3xl border border-border bg-card p-6">
           <h2 className="text-lg font-semibold">Order summary</h2>
-          <dl className="mt-5 space-y-3 text-sm">
-            <div className="flex items-center justify-between">
-              <dt className="text-muted-foreground">Photos</dt>
-              <dd className="font-medium">{count}</dd>
-            </div>
-            <div className="flex items-center justify-between border-t border-border pt-3 text-base">
-              <dt className="font-medium">Total</dt>
-              <dd className="font-semibold">{formatPrice(total)}</dd>
-            </div>
-          </dl>
+          <div className="mt-5">
+            <PricingSummary
+              count={count}
+              originalTotal={originalTotal}
+              discount={discount}
+              total={total}
+              bundleCount={bundleCount}
+            />
+          </div>
           <Button className="mt-6 w-full rounded-full" render={<Link href="/checkout" />}>
             Proceed to checkout
             <ArrowRight className="size-4" />
@@ -107,6 +110,45 @@ export function CartView() {
           </p>
         </div>
       </aside>
+      <div className="lg:col-span-2">
+        <TeamPackageCard />
+      </div>
     </div>
+  )
+}
+
+function TeamPackageCard() {
+  return (
+    <section className="rounded-3xl border border-border bg-card p-6 sm:p-7">
+      <div className="grid items-center gap-6 sm:grid-cols-[1fr_auto]">
+        <div>
+          <div className="flex items-center gap-3">
+            <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <Users className="size-5" />
+            </span>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary">Separate package</p>
+              <h2 className="text-xl font-semibold">Team Package</h2>
+            </div>
+          </div>
+          <p className="mt-4 text-sm text-muted-foreground">20 professionally selected team photos</p>
+          <ul className="mt-3 grid gap-2 text-sm sm:grid-cols-3">
+            {["Action shots", "Team moments", "Group photos"].map((item) => (
+              <li key={item} className="flex items-center gap-2">
+                <Check className="size-4 text-primary" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="sm:text-right">
+          <p className="text-3xl font-semibold tracking-tight">£75</p>
+          <Button className="mt-3 w-full rounded-full sm:w-auto" render={<Link href="/checkout?product=team-package" />}>
+            Choose package
+            <ArrowRight className="size-4" />
+          </Button>
+        </div>
+      </div>
+    </section>
   )
 }

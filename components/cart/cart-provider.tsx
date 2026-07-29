@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useCallback, useEffect, useMemo, useState } from "react"
 import type { CartItem } from "@/types"
+import { calculatePhotoPricing } from "@/lib/pricing"
 
 const STORAGE_KEY = "flooy.cart.v1"
 
@@ -9,6 +10,9 @@ type CartContextValue = {
   items: CartItem[]
   count: number
   total: number
+  originalTotal: number
+  discount: number
+  bundleCount: number
   hasItem: (photoId: string) => boolean
   addItem: (item: CartItem) => void
   removeItem: (photoId: string) => void
@@ -76,17 +80,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const clear = useCallback(() => setItems([]), [])
 
   const value = useMemo<CartContextValue>(
-    () => ({
-      items,
-      count: items.length,
-      total: items.reduce((sum, i) => sum + (Number(i.price) || 0), 0),
-      hasItem,
-      addItem,
-      removeItem,
-      toggleItem,
-      clear,
-      hydrated,
-    }),
+    () => {
+      const pricing = calculatePhotoPricing(items.map((item) => item.price))
+      return {
+        items,
+        count: items.length,
+        total: pricing.total,
+        originalTotal: pricing.originalTotal,
+        discount: pricing.discount,
+        bundleCount: pricing.bundleCount,
+        hasItem,
+        addItem,
+        removeItem,
+        toggleItem,
+        clear,
+        hydrated,
+      }
+    },
     [items, hasItem, addItem, removeItem, toggleItem, clear, hydrated],
   )
 

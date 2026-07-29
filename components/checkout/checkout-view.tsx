@@ -4,13 +4,15 @@ import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
+import { Check, Loader2, Users } from "lucide-react"
 import { useCart } from "@/components/cart/cart-provider"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { formatPrice } from "@/lib/format"
 import { SafeImage } from "@/components/safe-image"
+import { PricingSummary } from "@/components/checkout/pricing-summary"
+import { TEAM_PACKAGE_PRICE } from "@/lib/pricing"
 
 const COUNTRY_CODES = [
   ["ET", "Ethiopia", "+251"],
@@ -34,14 +36,15 @@ const COUNTRY_CODES = [
   ["AU", "Australia", "+61"],
 ] as const
 
-export function CheckoutView() {
+export function CheckoutView({ productType }: { productType: "PHOTOS" | "TEAM_PACKAGE" }) {
   const router = useRouter()
-  const { items, total, count, clear } = useCart()
+  const { items, total, originalTotal, discount, bundleCount, count, clear } = useCart()
+  const isTeamPackage = productType === "TEAM_PACKAGE"
   const [submitting, setSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const checkoutKey = useRef<string | null>(null)
 
-  if (count === 0) {
+  if (!isTeamPackage && count === 0) {
     return (
       <div className="rounded-3xl border border-border bg-card px-6 py-16 text-center">
         <h1 className="text-xl font-semibold">Nothing to check out</h1>
@@ -88,7 +91,8 @@ export function CheckoutView() {
           name,
           email,
           phone,
-          photoIds: items.map((i) => i.photoId),
+          productType,
+          ...(isTeamPackage ? {} : { photoIds: items.map((i) => i.photoId) }),
           checkoutKey: checkoutKey.current,
         }),
       })
@@ -96,7 +100,7 @@ export function CheckoutView() {
       if (!res.ok) {
         throw new Error(data.error ?? "Checkout failed")
       }
-      clear()
+      if (!isTeamPackage) clear()
       router.push(`/orders/${data.order.orderNumber}`)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Checkout failed")
@@ -173,31 +177,70 @@ export function CheckoutView() {
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="rounded-3xl border border-border bg-card p-6">
-            <h2 className="text-sm font-semibold text-muted-foreground">
-              {count} {count === 1 ? "photo" : "photos"}
-            </h2>
-            <ul className="mt-4 grid grid-cols-4 gap-2">
-              {items.slice(0, 8).map((item) => (
-                <li key={item.photoId} className="relative aspect-square overflow-hidden rounded-lg">
-                  <SafeImage
-                    src={item.previewUrl || "/placeholder.svg"}
-                    alt=""
-                    fill
-                    sizes="60px"
-                    className="object-cover"
+            {isTeamPackage ? (
+              <TeamPackageSummary />
+            ) : (
+              <>
+                <h2 className="text-lg font-semibold">Order summary</h2>
+                <ul className="mt-4 grid grid-cols-4 gap-2">
+                  {items.slice(0, 8).map((item) => (
+                    <li key={item.photoId} className="relative aspect-square overflow-hidden rounded-lg">
+                      <SafeImage
+                        src={item.previewUrl || "/placeholder.svg"}
+                        alt=""
+                        fill
+                        sizes="60px"
+                        className="object-cover"
+                      />
+                    </li>
+                  ))}
+                </ul>
+                {count > 8 && (
+                  <p className="mt-2 text-xs text-muted-foreground">+{count - 8} more</p>
+                )}
+                <div className="mt-5 border-t border-border pt-4">
+                  <PricingSummary
+                    count={count}
+                    originalTotal={originalTotal}
+                    discount={discount}
+                    total={total}
+                    bundleCount={bundleCount}
                   />
-                </li>
-              ))}
-            </ul>
-            {count > 8 && (
-              <p className="mt-2 text-xs text-muted-foreground">+{count - 8} more</p>
+                </div>
+              </>
             )}
-            <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
-              <span className="text-sm font-medium">Total</span>
-              <span className="text-lg font-semibold">{formatPrice(total)}</span>
-            </div>
           </div>
         </aside>
+      </div>
+    </div>
+  )
+}
+
+function TeamPackageSummary() {
+  return (
+    <div>
+      <div className="flex items-center gap-3">
+        <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <Users className="size-5" />
+        </span>
+        <div>
+          <h2 className="font-semibold">Team Package</h2>
+          <p className="text-sm text-muted-foreground">20 Team Photos</p>
+        </div>
+      </div>
+      <ul className="mt-5 space-y-2 border-t border-border pt-4 text-sm">
+        {["Action shots", "Team moments", "Group photos"].map((item) => (
+          <li key={item} className="flex items-center gap-2 text-muted-foreground">
+            <Check className="size-4 text-primary" />
+            {item}
+          </li>
+        ))}
+      </ul>
+      <div className="mt-5 flex items-end justify-between border-t border-border pt-4">
+        <span className="font-semibold">Total</span>
+        <span className="text-2xl font-semibold tracking-tight">
+          {formatPrice(TEAM_PACKAGE_PRICE, "GBP")}
+        </span>
       </div>
     </div>
   )

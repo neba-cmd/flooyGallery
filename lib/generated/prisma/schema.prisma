@@ -18,6 +18,7 @@ enum OrderStatus {
   PENDING_PAYMENT
   PAID
   COMPLETED
+  REFUNDED
   CANCELLED
 }
 
@@ -84,6 +85,8 @@ model Order {
   checkoutKey String? @unique // client-generated idempotency key
   eventId     String?
   event       Event?  @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  productType String  @default("PHOTOS")
+  currency    String  @default("EUR")
 
   customerName  String
   customerEmail String?
@@ -95,6 +98,7 @@ model Order {
 
   paidAt      DateTime?
   completedAt DateTime?
+  refundedAt  DateTime?
   cancelledAt DateTime?
 
   createdAt DateTime @default(now())

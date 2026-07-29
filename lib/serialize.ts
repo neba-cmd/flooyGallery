@@ -79,6 +79,9 @@ type OrderRow = {
   createdAt: Date
   paidAt: Date | null
   completedAt: Date | null
+  refundedAt: Date | null
+  productType: string
+  currency: string
   event?: { name: string } | null
   _count?: { items: number }
   items?: Array<{
@@ -106,10 +109,13 @@ export function serializeOrder(row: OrderRow): OrderDTO {
     status: row.status as OrderDTO["status"],
     totalAmount: row.totalAmount,
     eventName: row.event?.name ?? null,
+    productType: row.productType as OrderDTO["productType"],
+    currency: row.currency as OrderDTO["currency"],
     itemCount: row._count?.items ?? items?.length ?? 0,
     createdAt: row.createdAt.toISOString(),
     paidAt: row.paidAt ? row.paidAt.toISOString() : null,
     completedAt: row.completedAt ? row.completedAt.toISOString() : null,
+    refundedAt: row.refundedAt ? row.refundedAt.toISOString() : null,
     items,
   }
 }
@@ -122,10 +128,13 @@ export function toPublicOrder(order: OrderDTO): PublicOrderDTO {
     status: order.status,
     totalAmount: order.totalAmount,
     eventName: order.eventName,
+    productType: order.productType,
+    currency: order.currency,
     itemCount: order.itemCount,
     createdAt: order.createdAt,
     paidAt: order.paidAt,
     completedAt: order.completedAt,
+    refundedAt: order.refundedAt,
     items: order.items,
   }
 }

@@ -9,7 +9,7 @@ import {
 } from "@/lib/order-access"
 import { toPublicOrder } from "@/lib/serialize"
 
-const checkoutSchema = z.object({
+const customerFields = {
   name: z.string().trim().min(2, "Please enter your name").max(120),
   email: z.string().trim().email("Invalid email").max(200).optional().or(z.literal("")),
   phone: z.string().trim().max(40).refine((value) => {
@@ -17,9 +17,20 @@ const checkoutSchema = z.object({
     const digits = value.replace(/\D/g, "")
     return value.startsWith("+") && digits.length >= 8 && digits.length <= 15
   }, "Enter a valid international phone number").optional().or(z.literal("")),
-  photoIds: z.array(z.string().min(1)).min(1, "Select at least one photo").max(500),
   checkoutKey: z.string().uuid().optional(),
-}).refine((value) => Boolean(value.email || value.phone), {
+}
+
+const checkoutSchema = z.discriminatedUnion("productType", [
+  z.object({
+    ...customerFields,
+    productType: z.literal("PHOTOS"),
+    photoIds: z.array(z.string().min(1)).min(1, "Select at least one photo").max(500),
+  }),
+  z.object({
+    ...customerFields,
+    productType: z.literal("TEAM_PACKAGE"),
+  }),
+]).refine((value) => Boolean(value.email || value.phone), {
   message: "Enter an email address or phone number",
   path: ["email"],
 })
@@ -42,14 +53,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid input" }, { status: 400 })
   }
 
-  const { name, email, phone, photoIds, checkoutKey } = parsed.data
+  const { name, email, phone, checkoutKey, productType } = parsed.data
 
   try {
     const order = await createOrder({
       customerName: name,
       customerEmail: email || undefined,
       customerPhone: phone || undefined,
-      photoIds,
+      photoIds: productType === "PHOTOS" ? parsed.data.photoIds : undefined,
+      productType,
       checkoutKey,
     })
     const response = NextResponse.json({ order: toPublicOrder(order) }, { status: 201 })

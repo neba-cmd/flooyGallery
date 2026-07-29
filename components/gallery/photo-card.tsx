@@ -4,7 +4,6 @@ import { memo } from "react"
 import { Check, Plus, Maximize2 } from "lucide-react"
 import type { PhotoDTO } from "@/types"
 import { useCart } from "@/components/cart/cart-provider"
-import { formatPrice } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
 type PhotoCardProps = {
@@ -22,7 +21,7 @@ function PhotoCardBase({ photo, onOpen }: PhotoCardProps) {
       className={cn(
         "group relative overflow-hidden rounded-2xl bg-muted ring-1 ring-border/60 transition-shadow duration-300",
         "hover:shadow-lg hover:shadow-black/5",
-        selected && "ring-2 ring-primary",
+        selected && "ring-2 ring-primary shadow-lg shadow-primary/10",
       )}
     >
       <button
@@ -84,15 +83,16 @@ function PhotoCardBase({ photo, onOpen }: PhotoCardProps) {
             })
           }
           className={cn(
-            "pointer-events-auto flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium shadow-sm backdrop-blur-sm transition-colors",
+            "pointer-events-auto flex min-w-20 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold shadow-sm backdrop-blur-sm transition-colors",
             selected
               ? "bg-primary text-primary-foreground"
               : "bg-white/90 text-foreground hover:bg-white",
           )}
           aria-pressed={selected}
+          aria-label={selected ? "Remove photo from selection" : "Add photo to selection"}
         >
           {selected ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-          {formatPrice(photo.price)}
+          {selected ? "Added ✓" : "Add"}
         </button>
       </div>
     </div>

@@ -1,6 +1,6 @@
 /** Serialized DTOs passed from Server Components / API routes to the client. */
 
-export type OrderStatus = "PENDING_PAYMENT" | "PAID" | "COMPLETED" | "CANCELLED"
+export type OrderStatus = "PENDING_PAYMENT" | "PAID" | "COMPLETED" | "REFUNDED" | "CANCELLED"
 
 export interface EventDTO {
   id: string
@@ -54,10 +54,13 @@ export interface OrderDTO {
   status: OrderStatus
   totalAmount: number
   eventName: string | null
+  productType: "PHOTOS" | "TEAM_PACKAGE"
+  currency: "EUR" | "GBP"
   itemCount: number
   createdAt: string
   paidAt: string | null
   completedAt: string | null
+  refundedAt: string | null
   items?: OrderItemDTO[]
 }
 
@@ -73,5 +76,6 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   PENDING_PAYMENT: "Pending Payment",
   PAID: "Paid",
   COMPLETED: "Completed",
+  REFUNDED: "Refunded",
   CANCELLED: "Cancelled",
 }

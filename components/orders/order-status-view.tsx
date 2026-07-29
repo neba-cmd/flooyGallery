@@ -98,12 +98,16 @@ export function OrderStatusView({ order }: { order: PublicOrderDTO }) {
             <dd className="mt-1 font-medium">{order.customerName}</dd>
           </div>
           <div>
-            <dt className="text-muted-foreground">Photos</dt>
-            <dd className="mt-1 font-medium">{order.itemCount}</dd>
+            <dt className="text-muted-foreground">
+              {order.productType === "TEAM_PACKAGE" ? "Product" : "Photos"}
+            </dt>
+            <dd className="mt-1 font-medium">
+              {order.productType === "TEAM_PACKAGE" ? "Team Package" : order.itemCount}
+            </dd>
           </div>
           <div>
             <dt className="text-muted-foreground">Total</dt>
-            <dd className="mt-1 font-medium">{formatPrice(order.totalAmount)}</dd>
+            <dd className="mt-1 font-medium">{formatPrice(order.totalAmount, order.currency)}</dd>
           </div>
           <div>
             <dt className="text-muted-foreground">Placed</dt>
@@ -112,6 +116,16 @@ export function OrderStatusView({ order }: { order: PublicOrderDTO }) {
         </dl>
       </div>
 
+      {order.productType === "TEAM_PACKAGE" ? (
+        <div className="mt-8 rounded-3xl border border-border bg-card p-6">
+          <h2 className="text-lg font-semibold">Team Package</h2>
+          <p className="mt-1 text-sm text-muted-foreground">20 professionally selected team photos</p>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Includes action shots, team moments, and group photos.
+          </p>
+        </div>
+      ) : (
+        <>
       <h2 className="mt-8 mb-4 text-lg font-semibold">Your photos</h2>
       <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         {order.items?.map((item) => (
@@ -148,6 +162,8 @@ export function OrderStatusView({ order }: { order: PublicOrderDTO }) {
           </li>
         ))}
       </ul>
+        </>
+      )}
     </div>
   )
 }

@@ -4,6 +4,7 @@ import { serializeOrder, effectivePrice } from "@/lib/serialize"
 import { createDownloadUrl, objectExists } from "@/lib/storage/r2"
 import type { OrderDTO } from "@/types"
 import { Prisma, type OrderStatus } from "@/lib/generated/prisma/client"
+import { calculatePhotoPricing, TEAM_PACKAGE_PRICE } from "@/lib/pricing"
 
 const DOWNLOAD_TTL_SECONDS = 300
 
@@ -11,7 +12,8 @@ export type CreateOrderInput = {
   customerName: string
   customerEmail?: string | null
   customerPhone?: string | null
-  photoIds: string[]
+  photoIds?: string[]
+  productType?: "PHOTOS" | "TEAM_PACKAGE"
   checkoutKey?: string
 }
 
@@ -30,7 +32,11 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderDTO> {
     })
     if (existing) return serializeOrder(existing)
   }
-  const photoIds = Array.from(new Set(input.photoIds))
+  if (input.productType === "TEAM_PACKAGE") {
+    return createTeamPackageOrder(input)
+  }
+
+  const photoIds = Array.from(new Set(input.photoIds ?? []))
   if (photoIds.length === 0) throw new Error("Cannot create an order with no photos")
 
   const photos = await prisma.photo.findMany({
@@ -53,7 +59,7 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderDTO> {
   if (items.some((item) => !Number.isSafeInteger(item.unitPrice) || item.unitPrice <= 0)) {
     throw new Error("One or more selected photos has an invalid price")
   }
-  const totalAmount = items.reduce((sum, i) => sum + i.unitPrice, 0)
+  const totalAmount = calculatePhotoPricing(items.map((item) => item.unitPrice)).total
   const eventId = photos[0].eventId
 
   for (let attempt = 0; attempt < 5; attempt++) {
@@ -86,6 +92,40 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderDTO> {
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
         continue
       }
+      throw err
+    }
+  }
+  throw new Error("Could not generate a unique order number, please try again")
+}
+
+async function createTeamPackageOrder(input: CreateOrderInput): Promise<OrderDTO> {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const orderNumber = await generateOrderNumber()
+    try {
+      const order = await prisma.order.create({
+        data: {
+          orderNumber,
+          checkoutKey: input.checkoutKey,
+          productType: "TEAM_PACKAGE",
+          currency: "GBP",
+          customerName: input.customerName.trim(),
+          customerEmail: input.customerEmail?.trim() || null,
+          customerPhone: input.customerPhone?.trim() || null,
+          totalAmount: TEAM_PACKAGE_PRICE,
+          status: "PENDING_PAYMENT",
+        },
+        include: { items: { include: { photo: true } }, event: true },
+      })
+      return serializeOrder(order)
+    } catch (err: unknown) {
+      if (input.checkoutKey && err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+        const existing = await prisma.order.findUnique({
+          where: { checkoutKey: input.checkoutKey },
+          include: { items: { include: { photo: true } }, event: true },
+        })
+        if (existing) return serializeOrder(existing)
+      }
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") continue
       throw err
     }
   }
@@ -131,8 +171,9 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus): P
   if (!current) throw new Error("Order not found")
   const allowed: Record<OrderStatus, OrderStatus[]> = {
     PENDING_PAYMENT: ["PAID", "CANCELLED"],
-    PAID: ["COMPLETED", "CANCELLED"],
-    COMPLETED: ["PAID"],
+    PAID: ["COMPLETED", "REFUNDED"],
+    COMPLETED: ["PAID", "REFUNDED"],
+    REFUNDED: [],
     CANCELLED: ["PENDING_PAYMENT"],
   }
   if (current.status !== status && !allowed[current.status].includes(status)) {
@@ -142,16 +183,22 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus): P
   if (status === "PAID") {
     timestamps.paidAt = new Date()
     timestamps.completedAt = null
+    timestamps.refundedAt = null
     timestamps.cancelledAt = null
   }
   if (status === "COMPLETED") {
     timestamps.completedAt = new Date()
     timestamps.cancelledAt = null
   }
+  if (status === "REFUNDED") {
+    timestamps.refundedAt = new Date()
+    timestamps.cancelledAt = null
+  }
   if (status === "CANCELLED") timestamps.cancelledAt = new Date()
   if (status === "PENDING_PAYMENT") {
     timestamps.paidAt = null
     timestamps.completedAt = null
+    timestamps.refundedAt = null
     timestamps.cancelledAt = null
   }
 

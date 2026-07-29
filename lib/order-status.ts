@@ -28,6 +28,12 @@ export const ORDER_STATUS: Record<OrderStatus, StatusConfig> = {
     badgeClass: "bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30",
     downloadable: true,
   },
+  REFUNDED: {
+    label: "Refunded",
+    description: "This order was refunded. Downloads are no longer available.",
+    badgeClass: "bg-violet-500/15 text-violet-600 dark:text-violet-400 border-violet-500/30",
+    downloadable: false,
+  },
   CANCELLED: {
     label: "Cancelled",
     description: "This order was cancelled. Please speak to a member of staff if this is unexpected.",
@@ -40,5 +46,6 @@ export const ORDER_STATUS_LIST: OrderStatus[] = [
   "PENDING_PAYMENT",
   "PAID",
   "COMPLETED",
+  "REFUNDED",
   "CANCELLED",
 ]

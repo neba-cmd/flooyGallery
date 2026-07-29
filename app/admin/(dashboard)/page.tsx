@@ -34,7 +34,7 @@ export default async function AdminDashboardPage() {
           {stats.recentOrders.length === 0 ? <p className="text-sm text-muted-foreground">No orders yet.</p> : stats.recentOrders.map((order) => (
             <Link key={order.id} href={`/admin/orders/${order.orderNumber}`} className="flex items-center justify-between gap-4 rounded-lg border p-3 hover:bg-muted">
               <div><p className="font-mono text-sm font-medium">{order.orderNumber}</p><p className="text-xs text-muted-foreground">{order.customerName} · {formatDateTime(order.createdAt)}</p></div>
-              <div className="text-right"><p className="font-medium">{formatPrice(order.totalAmount)}</p><p className="text-xs text-muted-foreground">{order.status.replaceAll("_", " ")}</p></div>
+              <div className="text-right"><p className="font-medium">{formatPrice(order.totalAmount, order.currency)}</p><p className="text-xs text-muted-foreground">{order.status.replaceAll("_", " ")}</p></div>
             </Link>
           ))}
         </CardContent>

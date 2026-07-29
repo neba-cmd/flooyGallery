@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react"
 import { ChevronLeft, ChevronRight, X, Check, Plus, ZoomIn, ZoomOut } from "lucide-react"
 import type { PhotoDTO } from "@/types"
 import { useCart } from "@/components/cart/cart-provider"
-import { formatPrice } from "@/lib/format"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -135,9 +134,10 @@ export function Lightbox({ photos, index, onClose, onNavigate }: LightboxProps) 
           }
           variant={selected ? "secondary" : "default"}
           className="gap-2"
+          aria-pressed={selected}
         >
           {selected ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-          {selected ? "Added" : `Add · ${formatPrice(photo.price)}`}
+          {selected ? "Added ✓" : "Add"}
         </Button>
       </div>
     </div>

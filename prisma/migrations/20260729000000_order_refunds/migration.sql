@@ -1,0 +1,3 @@
+ALTER TYPE "OrderStatus" ADD VALUE 'REFUNDED';
+
+ALTER TABLE "Order" ADD COLUMN "refundedAt" TIMESTAMP(3);
