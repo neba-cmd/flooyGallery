@@ -30,16 +30,17 @@ export function Gallery({ events, initialEventId }: GalleryProps) {
         const utcDay = new Date(event.date).getUTCDay()
         const eventDay = utcDay === 0 ? 7 : utcDay
         return eventDay === dayOfWeek
-      }),
+      }).sort((a, b) => a.name.localeCompare(b.name)),
     [dayOfWeek, events],
   )
 
   const filters: PhotoFilters = useMemo(
-    () => ({ search: debouncedSearch || undefined, eventId }),
-    [debouncedSearch, eventId],
+    () => ({ search: debouncedSearch || undefined, eventId, dayOfWeek }),
+    [debouncedSearch, eventId, dayOfWeek],
   )
 
-  const { photos, total, error, isLoading, isLoadingMore, reachedEnd, loadMore } = usePhotos(filters, Boolean(eventId))
+  const hasMatches = availableEvents.length > 0
+  const { photos, total, error, isLoading, isLoadingMore, reachedEnd, loadMore } = usePhotos(filters, hasMatches)
 
   const changeDay = useCallback((day: number | undefined) => {
     setDayOfWeek(day)
@@ -89,20 +90,14 @@ export function Gallery({ events, initialEventId }: GalleryProps) {
         resultCount={total}
       />
 
-      {eventId && error && (
+      {hasMatches && error && (
         <div className="flex flex-col items-center gap-2 rounded-2xl border border-border/60 bg-card py-16 text-center">
           <ImageOff className="h-8 w-8 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">Couldn&apos;t load photos. Please try again.</p>
         </div>
       )}
 
-      {!eventId ? (
-        availableEvents.length > 0 && (
-          <div className="rounded-2xl border border-dashed border-border bg-muted/30 px-5 py-14 text-center">
-            <p className="font-medium">Select a match to view its photos</p>
-          </div>
-        )
-      ) : isLoading ? (
+      {!hasMatches ? null : isLoading ? (
         <MasonrySkeleton />
       ) : photos.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-2xl border border-border/60 bg-card py-20 text-center">

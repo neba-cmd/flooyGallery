@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 const DAYS = ["All Days", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+const ALL_GAMES = "__all_games__"
 
 type GalleryFiltersProps = {
   search: string
@@ -64,11 +65,21 @@ export function GalleryFilters({
       {hasMatches ? (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="sm:w-64">
-            <Select value={eventId ?? ""} onValueChange={(value) => onEventChange(value || undefined)}>
-              <SelectTrigger className="h-11 w-full rounded-xl" aria-label="Select a match">
-                <SelectValue placeholder="Select a match" />
+            <Select
+              value={eventId ?? ALL_GAMES}
+              onValueChange={(value) => onEventChange(!value || value === ALL_GAMES ? undefined : value)}
+            >
+              <SelectTrigger className="h-11 w-full rounded-xl" aria-label="Filter by game">
+                <SelectValue>
+                  {(value) =>
+                    value === ALL_GAMES
+                      ? "All games"
+                      : events.find((event) => event.id === value)?.name ?? "Select a game"
+                  }
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value={ALL_GAMES}>All games</SelectItem>
                 {events.map((event) => (
                   <SelectItem key={event.id} value={event.id}>
                     {event.name}
@@ -78,18 +89,16 @@ export function GalleryFilters({
             </Select>
           </div>
 
-          {eventId && (
-            <div className="relative flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={(event) => onSearchChange(event.target.value)}
-                placeholder="Search by photo number or filename…"
-                className="h-11 rounded-xl pl-9"
-                aria-label="Search photos"
-              />
-            </div>
-          )}
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(event) => onSearchChange(event.target.value)}
+              placeholder="Search by photo number or filename…"
+              className="h-11 rounded-xl pl-9"
+              aria-label="Search photos"
+            />
+          </div>
         </div>
       ) : (
         <div className="rounded-2xl border border-border/60 bg-card px-5 py-10 text-center">
@@ -97,7 +106,7 @@ export function GalleryFilters({
         </div>
       )}
 
-      {eventId && (
+      {hasMatches && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
             {resultCount.toLocaleString()} {resultCount === 1 ? "photo" : "photos"}
