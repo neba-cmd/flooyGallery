@@ -18,14 +18,21 @@ type GalleryProps = {
 export function Gallery({ events, initialEventId }: GalleryProps) {
   const [search, setSearch] = useState("")
   const [eventId, setEventId] = useState<string | undefined>(initialEventId)
-  const [dayOfWeek, setDayOfWeek] = useState<number | undefined>(undefined)
+  const [date, setDate] = useState("")
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   const debouncedSearch = useDebounced(search, 350)
+  const dateRange = useMemo(() => {
+    if (!date) return {}
+    const start = new Date(`${date}T00:00:00`)
+    const end = new Date(start)
+    end.setDate(end.getDate() + 1)
+    return { dateFrom: start.toISOString(), dateTo: end.toISOString() }
+  }, [date])
 
   const filters: PhotoFilters = useMemo(
-    () => ({ search: debouncedSearch || undefined, eventId, dayOfWeek }),
-    [debouncedSearch, eventId, dayOfWeek],
+    () => ({ search: debouncedSearch || undefined, eventId, ...dateRange }),
+    [debouncedSearch, eventId, dateRange],
   )
 
   const { photos, total, error, isLoading, isLoadingMore, reachedEnd, loadMore } = usePhotos(filters)
@@ -60,8 +67,8 @@ export function Gallery({ events, initialEventId }: GalleryProps) {
         onSearchChange={setSearch}
         eventId={eventId}
         onEventChange={setEventId}
-        dayOfWeek={dayOfWeek}
-        onDayChange={setDayOfWeek}
+        date={date}
+        onDateChange={setDate}
         events={events}
         resultCount={total}
       />

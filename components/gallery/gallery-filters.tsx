@@ -13,15 +13,14 @@ import {
 import { Button } from "@/components/ui/button"
 
 const ALL = "__all__"
-const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 type GalleryFiltersProps = {
   search: string
   onSearchChange: (value: string) => void
   eventId: string | undefined
   onEventChange: (value: string | undefined) => void
-  dayOfWeek: number | undefined
-  onDayChange: (value: number | undefined) => void
+  date: string
+  onDateChange: (value: string) => void
   events: EventDTO[]
   resultCount: number
 }
@@ -31,12 +30,12 @@ export function GalleryFilters({
   onSearchChange,
   eventId,
   onEventChange,
-  dayOfWeek,
-  onDayChange,
+  date,
+  onDateChange,
   events,
   resultCount,
 }: GalleryFiltersProps) {
-  const hasFilters = Boolean(search || eventId || dayOfWeek)
+  const hasFilters = Boolean(search || eventId || date)
 
   return (
     <div className="flex flex-col gap-3">
@@ -69,24 +68,13 @@ export function GalleryFilters({
             </SelectContent>
           </Select>
 
-          <Select
-            value={dayOfWeek ? String(dayOfWeek) : ALL}
-            onValueChange={(v) => onDayChange(!v || v === ALL ? undefined : Number(v))}
-          >
-            <SelectTrigger className="h-11 w-full rounded-xl sm:w-44" aria-label="Filter by day">
-              <SelectValue>
-                {(value) => (value === ALL ? "All days" : DAYS[Number(value) - 1])}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>All days</SelectItem>
-              {DAYS.map((day, index) => (
-                <SelectItem key={day} value={String(index + 1)}>
-                  {day}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Input
+            type="date"
+            value={date}
+            onChange={(e) => onDateChange(e.target.value)}
+            className="h-11 w-full rounded-xl sm:w-44"
+            aria-label="Filter by match date"
+          />
         </div>
       </div>
 
@@ -102,7 +90,7 @@ export function GalleryFilters({
             onClick={() => {
               onSearchChange("")
               onEventChange(undefined)
-              onDayChange(undefined)
+              onDateChange("")
             }}
           >
             <X className="h-3.5 w-3.5" /> Clear filters
