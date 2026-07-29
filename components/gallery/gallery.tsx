@@ -18,24 +18,40 @@ type GalleryProps = {
 export function Gallery({ events, initialEventId }: GalleryProps) {
   const [search, setSearch] = useState("")
   const [eventId, setEventId] = useState<string | undefined>(initialEventId)
-  const [date, setDate] = useState("")
+  const [dayOfWeek, setDayOfWeek] = useState<number | undefined>(undefined)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   const debouncedSearch = useDebounced(search, 350)
-  const dateRange = useMemo(() => {
-    if (!date) return {}
-    const start = new Date(`${date}T00:00:00`)
-    const end = new Date(start)
-    end.setDate(end.getDate() + 1)
-    return { dateFrom: start.toISOString(), dateTo: end.toISOString() }
-  }, [date])
-
-  const filters: PhotoFilters = useMemo(
-    () => ({ search: debouncedSearch || undefined, eventId, ...dateRange }),
-    [debouncedSearch, eventId, dateRange],
+  const availableEvents = useMemo(
+    () =>
+      events.filter((event) => {
+        if (!event.date || !event.photoCount) return false
+        if (!dayOfWeek) return true
+        const utcDay = new Date(event.date).getUTCDay()
+        const eventDay = utcDay === 0 ? 7 : utcDay
+        return eventDay === dayOfWeek
+      }),
+    [dayOfWeek, events],
   )
 
-  const { photos, total, error, isLoading, isLoadingMore, reachedEnd, loadMore } = usePhotos(filters)
+  const filters: PhotoFilters = useMemo(
+    () => ({ search: debouncedSearch || undefined, eventId }),
+    [debouncedSearch, eventId],
+  )
+
+  const { photos, total, error, isLoading, isLoadingMore, reachedEnd, loadMore } = usePhotos(filters, Boolean(eventId))
+
+  const changeDay = useCallback((day: number | undefined) => {
+    setDayOfWeek(day)
+    setEventId(undefined)
+    setSearch("")
+    setLightboxIndex(null)
+  }, [])
+  const changeEvent = useCallback((id: string | undefined) => {
+    setEventId(id)
+    setSearch("")
+    setLightboxIndex(null)
+  }, [])
 
   // Infinite scroll sentinel.
   const sentinelRef = useRef<HTMLDivElement | null>(null)
@@ -66,21 +82,27 @@ export function Gallery({ events, initialEventId }: GalleryProps) {
         search={search}
         onSearchChange={setSearch}
         eventId={eventId}
-        onEventChange={setEventId}
-        date={date}
-        onDateChange={setDate}
-        events={events}
+        onEventChange={changeEvent}
+        dayOfWeek={dayOfWeek}
+        onDayChange={changeDay}
+        events={availableEvents}
         resultCount={total}
       />
 
-      {error && (
+      {eventId && error && (
         <div className="flex flex-col items-center gap-2 rounded-2xl border border-border/60 bg-card py-16 text-center">
           <ImageOff className="h-8 w-8 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">Couldn&apos;t load photos. Please try again.</p>
         </div>
       )}
 
-      {isLoading ? (
+      {!eventId ? (
+        availableEvents.length > 0 && (
+          <div className="rounded-2xl border border-dashed border-border bg-muted/30 px-5 py-14 text-center">
+            <p className="font-medium">Select a match to view its photos</p>
+          </div>
+        )
+      ) : isLoading ? (
         <MasonrySkeleton />
       ) : photos.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-2xl border border-border/60 bg-card py-20 text-center">

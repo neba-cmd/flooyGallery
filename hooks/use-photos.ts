@@ -31,9 +31,10 @@ function buildUrl(filters: PhotoFilters, cursor: string | null) {
   return `/api/photos?${params.toString()}`
 }
 
-export function usePhotos(filters: PhotoFilters) {
+export function usePhotos(filters: PhotoFilters, enabled = true) {
   const { data, size, setSize, isLoading, isValidating, error } = useSWRInfinite<PhotoPage>(
     (index, previous) => {
+      if (!enabled) return null
       if (previous && previous.nextCursor === null) return null // reached the end
       const cursor = index === 0 ? null : (previous?.nextCursor ?? null)
       return buildUrl(filters, cursor)

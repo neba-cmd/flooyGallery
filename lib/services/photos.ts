@@ -43,11 +43,9 @@ export async function queryPhotos(query: PhotoQuery): Promise<PhotoPage> {
   if (query.dayOfWeek) where.dayOfWeek = query.dayOfWeek
 
   if (query.dateFrom || query.dateTo) {
-    const date: Prisma.DateTimeNullableFilter = {}
-    if (query.dateFrom) date.gte = query.dateFrom
-    // The upper boundary is exclusive so midnight belongs only to the next day.
-    if (query.dateTo) date.lt = query.dateTo
-    where.event = { published: true, date }
+    where.takenAt = {}
+    if (query.dateFrom) where.takenAt.gte = query.dateFrom
+    if (query.dateTo) where.takenAt.lte = query.dateTo
   }
 
   if (query.search) {
