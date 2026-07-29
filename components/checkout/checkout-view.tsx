@@ -14,68 +14,6 @@ import { SafeImage } from "@/components/safe-image"
 import { PricingSummary } from "@/components/checkout/pricing-summary"
 import { TEAM_PACKAGE_PRICE } from "@/lib/pricing"
 
-const COUNTRY_CODES = [
-  ["AL", "Albania", "+355"],
-  ["AD", "Andorra", "+376"],
-  ["AM", "Armenia", "+374"],
-  ["AT", "Austria", "+43"],
-  ["AZ", "Azerbaijan", "+994"],
-  ["BY", "Belarus", "+375"],
-  ["BE", "Belgium", "+32"],
-  ["BA", "Bosnia and Herzegovina", "+387"],
-  ["BG", "Bulgaria", "+359"],
-  ["HR", "Croatia", "+385"],
-  ["CY", "Cyprus", "+357"],
-  ["CZ", "Czechia", "+420"],
-  ["DK", "Denmark", "+45"],
-  ["EE", "Estonia", "+372"],
-  ["ET", "Ethiopia", "+251"],
-  ["FO", "Faroe Islands", "+298"],
-  ["FI", "Finland", "+358"],
-  ["FR", "France", "+33"],
-  ["GE", "Georgia", "+995"],
-  ["DE", "Germany", "+49"],
-  ["GI", "Gibraltar", "+350"],
-  ["GR", "Greece", "+30"],
-  ["GL", "Greenland", "+299"],
-  ["HU", "Hungary", "+36"],
-  ["IS", "Iceland", "+354"],
-  ["IE", "Ireland", "+353"],
-  ["IT", "Italy", "+39"],
-  ["XK", "Kosovo", "+383"],
-  ["LV", "Latvia", "+371"],
-  ["LI", "Liechtenstein", "+423"],
-  ["LT", "Lithuania", "+370"],
-  ["LU", "Luxembourg", "+352"],
-  ["MT", "Malta", "+356"],
-  ["MD", "Moldova", "+373"],
-  ["MC", "Monaco", "+377"],
-  ["ME", "Montenegro", "+382"],
-  ["NL", "Netherlands", "+31"],
-  ["MK", "North Macedonia", "+389"],
-  ["NO", "Norway", "+47"],
-  ["PL", "Poland", "+48"],
-  ["PT", "Portugal", "+351"],
-  ["RO", "Romania", "+40"],
-  ["RU", "Russia", "+7"],
-  ["SM", "San Marino", "+378"],
-  ["RS", "Serbia", "+381"],
-  ["SK", "Slovakia", "+421"],
-  ["SI", "Slovenia", "+386"],
-  ["ES", "Spain", "+34"],
-  ["SE", "Sweden", "+46"],
-  ["CH", "Switzerland", "+41"],
-  ["TR", "Turkey", "+90"],
-  ["UA", "Ukraine", "+380"],
-  ["GB", "United Kingdom", "+44"],
-  ["VA", "Vatican City", "+39"],
-  ["AE", "United Arab Emirates", "+971"],
-  ["SA", "Saudi Arabia", "+966"],
-  ["QA", "Qatar", "+974"],
-  ["AU", "Australia", "+61"],
-  ["US", "United States / Canada", "+1"],
-] as const
-
 export function CheckoutView({ productType }: { productType: "PHOTOS" | "TEAM_PACKAGE" }) {
   const router = useRouter()
   const { items, total, originalTotal, discount, bundleCount, count, clear } = useCart()
@@ -103,9 +41,7 @@ export function CheckoutView({ productType }: { productType: "PHOTOS" | "TEAM_PA
     const form = new FormData(e.currentTarget)
     const name = String(form.get("name") ?? "").trim()
     const email = String(form.get("email") ?? "").trim()
-    const localPhone = String(form.get("phone") ?? "").trim()
-    const countryCode = String(form.get("countryCode") ?? "+251")
-    const phone = localPhone ? `${countryCode} ${localPhone}` : ""
+    const phone = String(form.get("phone") ?? "").trim()
 
     if (name.length < 2) {
       setErrors({ name: "Please enter your full name" })
@@ -117,7 +53,7 @@ export function CheckoutView({ productType }: { productType: "PHOTOS" | "TEAM_PA
     }
     const phoneDigits = phone.replace(/\D/g, "")
     if (phone && (phoneDigits.length < 8 || phoneDigits.length > 15)) {
-      setErrors({ contact: "Enter a valid international phone number." })
+      setErrors({ contact: "Enter a valid phone number." })
       return
     }
 
@@ -178,23 +114,7 @@ export function CheckoutView({ productType }: { productType: "PHOTOS" | "TEAM_PA
               <Label htmlFor="phone">
                 Phone
               </Label>
-              <div className="grid grid-cols-[8.5rem_1fr] gap-2">
-                <select
-                  id="countryCode"
-                  name="countryCode"
-                  defaultValue="+251"
-                  aria-label="Country calling code"
-                  className="h-8 rounded-lg border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                >
-                  {COUNTRY_CODES.map(([country, , code]) => (
-                    <option key={country} value={code}>
-                      {country} {code}
-                    </option>
-                  ))}
-                </select>
-                <Input id="phone" name="phone" type="tel" autoComplete="tel-national" placeholder="Phone number" />
-              </div>
-              <p className="text-xs text-muted-foreground">Select your country code, then enter your phone number.</p>
+              <Input id="phone" name="phone" type="tel" autoComplete="tel" placeholder="Phone number" />
               {errors.contact && <p role="alert" className="text-xs text-destructive">{errors.contact}</p>}
             </div>
           </div>

@@ -15,8 +15,8 @@ const customerFields = {
   phone: z.string().trim().max(40).refine((value) => {
     if (!value) return true
     const digits = value.replace(/\D/g, "")
-    return value.startsWith("+") && digits.length >= 8 && digits.length <= 15
-  }, "Enter a valid international phone number").optional().or(z.literal("")),
+    return digits.length >= 8 && digits.length <= 15
+  }, "Enter a valid phone number").optional().or(z.literal("")),
   checkoutKey: z.string().uuid().optional(),
 }
 
