@@ -242,3 +242,36 @@ export async function getSignedDownloadUrl(orderNumber: string, itemId: string):
 
   return createDownloadUrl(item.photo.originalKey, item.photo.filename, DOWNLOAD_TTL_SECONDS)
 }
+
+export async function getSignedDownloadUrls(orderNumber: string) {
+  const order = await prisma.order.findUnique({
+    where: { orderNumber: orderNumber.trim().toUpperCase() },
+    select: {
+      status: true,
+      items: {
+        orderBy: { createdAt: "asc" },
+        select: {
+          id: true,
+          photo: { select: { originalKey: true, filename: true } },
+        },
+      },
+    },
+  })
+  if (!order) throw new Error("Order not found")
+  if (order.status !== "PAID" && order.status !== "COMPLETED") {
+    throw new Error("This order is not paid yet")
+  }
+  if (order.items.length === 0) throw new Error("Download not available for this order")
+
+  return Promise.all(
+    order.items.map(async (item) => ({
+      itemId: item.id,
+      filename: item.photo.filename,
+      url: await createDownloadUrl(
+        item.photo.originalKey,
+        item.photo.filename,
+        DOWNLOAD_TTL_SECONDS,
+      ),
+    })),
+  )
+}

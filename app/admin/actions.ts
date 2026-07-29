@@ -37,7 +37,14 @@ const eventSchema = z.object({
 
 export async function saveEventAction(input: z.input<typeof eventSchema>) {
   await requireAdmin()
-  const data = eventSchema.parse(input)
+  const parsed = eventSchema.safeParse(input)
+  if (!parsed.success) {
+    return {
+      ok: false as const,
+      error: parsed.error.issues[0]?.message ?? "Check the event details and try again.",
+    }
+  }
+  const data = parsed.data
   let event
   try {
     event = await prisma.event.upsert({
@@ -55,14 +62,14 @@ export async function saveEventAction(input: z.input<typeof eventSchema>) {
     })
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      throw new Error("An event with this slug already exists.")
+      return { ok: false as const, error: "An event with this slug already exists." }
     }
     console.error("[admin:event] Event save failed", error)
-    throw new Error("Could not save the event.")
+    return { ok: false as const, error: "Could not save the event." }
   }
   revalidatePath("/admin/events")
   revalidatePath("/")
-  return event.id
+  return { ok: true as const, eventId: event.id }
 }
 
 export async function toggleEventAction(id: string, published: boolean) {

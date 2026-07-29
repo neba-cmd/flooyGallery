@@ -13,6 +13,7 @@ import { SafeImage } from "@/components/safe-image"
 export function OrderStatusView({ order }: { order: PublicOrderDTO }) {
   const status = ORDER_STATUS[order.status]
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
+  const [downloadingAll, setDownloadingAll] = useState(false)
   const [copied, setCopied] = useState(false)
 
   async function handleDownload(itemId: string, filename: string) {
@@ -34,6 +35,30 @@ export function OrderStatusView({ order }: { order: PublicOrderDTO }) {
       toast.error(err instanceof Error ? err.message : "Download failed")
     } finally {
       setDownloadingId(null)
+    }
+  }
+
+  async function handleDownloadAll() {
+    setDownloadingAll(true)
+    try {
+      const res = await fetch(`/api/orders/${order.orderNumber}/download`)
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? "Could not generate download links")
+      const downloads = data.downloads as Array<{ filename: string; url: string }>
+      for (const download of downloads) {
+        const a = document.createElement("a")
+        a.href = download.url
+        a.download = download.filename
+        a.rel = "noopener"
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+      }
+      toast.success(`${downloads.length} ${downloads.length === 1 ? "photo" : "photos"} downloading`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Download failed")
+    } finally {
+      setDownloadingAll(false)
     }
   }
 
@@ -126,7 +151,19 @@ export function OrderStatusView({ order }: { order: PublicOrderDTO }) {
         </div>
       ) : (
         <>
-      <h2 className="mt-8 mb-4 text-lg font-semibold">Your photos</h2>
+      <div className="mt-8 mb-4 flex items-center justify-between gap-4">
+        <h2 className="text-lg font-semibold">Your photos</h2>
+        {status.downloadable && Boolean(order.items?.length) && (
+          <Button
+            className="rounded-full"
+            onClick={handleDownloadAll}
+            disabled={downloadingAll || downloadingId !== null}
+          >
+            {downloadingAll ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+            Download all
+          </Button>
+        )}
+      </div>
       <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         {order.items?.map((item) => (
           <li key={item.id} className="overflow-hidden rounded-2xl border border-border bg-card">
@@ -146,7 +183,7 @@ export function OrderStatusView({ order }: { order: PublicOrderDTO }) {
                   size="sm"
                   className="mt-2 w-full rounded-full"
                   onClick={() => handleDownload(item.id, item.photo.filename)}
-                  disabled={downloadingId === item.id}
+                  disabled={downloadingAll || downloadingId === item.id}
                 >
                   {downloadingId === item.id ? (
                     <Loader2 className="size-4 animate-spin" />

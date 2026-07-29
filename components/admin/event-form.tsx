@@ -25,7 +25,11 @@ export function EventForm({ event }: { event?: EventDTO & { description?: string
         const f = new FormData(e.currentTarget)
         startTransition(async () => {
           try {
-            await saveEventAction({ id: event?.id, name: String(f.get("name")), slug: String(f.get("slug")), location: String(f.get("location")), description: String(f.get("description")), date: String(f.get("date")), defaultPrice: Number(f.get("defaultPrice")), published: f.get("published") === "on" })
+            const result = await saveEventAction({ id: event?.id, name: String(f.get("name")), slug: String(f.get("slug")), location: String(f.get("location")), description: String(f.get("description")), date: String(f.get("date")), defaultPrice: Number(f.get("defaultPrice")), published: f.get("published") === "on" })
+            if (!result.ok) {
+              toast.error(result.error)
+              return
+            }
             toast.success("Event saved"); setOpen(false)
           } catch (error) { toast.error(error instanceof Error ? error.message : "Could not save event") }
         })
