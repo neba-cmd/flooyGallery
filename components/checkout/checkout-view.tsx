@@ -4,7 +4,7 @@ import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { toast } from "sonner"
-import { Banknote, Check, Loader2, Phone, Users } from "lucide-react"
+import { Banknote, Check, Loader2, Phone, Sparkles, Users } from "lucide-react"
 import { useCart } from "@/components/cart/cart-provider"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -89,7 +89,20 @@ export function CheckoutView({ productType }: { productType: "PHOTOS" | "TEAM_PA
         Create your order number, then contact our team to arrange cash payment.
       </p>
 
-      <div className="mt-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
+      <div className="mt-6 flex items-start gap-3 rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-emerald-950 shadow-sm dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-100 sm:p-5">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white">
+          <Sparkles className="size-5" />
+        </span>
+        <div>
+          <p className="text-lg font-bold">Get 45% off when you call</p>
+          <p className="mt-1 text-sm leading-relaxed">
+            Call and complete your checkout before <strong>15 August 2026</strong> to receive 45% off your order.
+            Our team will apply the discount when you contact us.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
         <Banknote className="mt-0.5 size-5 shrink-0" />
         <div>
           <p className="font-semibold">Pay in cash to complete your order</p>

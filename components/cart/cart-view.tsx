@@ -106,7 +106,8 @@ export function CartView() {
           </Button>
           <p className="mt-4 text-center text-xs leading-relaxed text-muted-foreground">
             No payment is taken online. Create an order number, then call +44 7403 302773 or
-            +44 7554 040886 to arrange cash payment.
+            +44 7554 040886 to arrange cash payment. Call and complete checkout before 15 August
+            2026 to receive 45% off; our team will apply the discount.
           </p>
         </div>
       </aside>
