@@ -1,6 +1,6 @@
 /** Serialized DTOs passed from Server Components / API routes to the client. */
 
-export type OrderStatus = "PENDING_PAYMENT" | "PAID" | "COMPLETED" | "REFUNDED" | "CANCELLED"
+export type OrderStatus = "PENDING_PAYMENT" | "PAID" | "FAILED" | "EXPIRED" | "COMPLETED" | "REFUNDED" | "CANCELLED"
 
 export interface EventDTO {
   id: string
@@ -75,6 +75,8 @@ export interface PaginatedResult<T> {
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   PENDING_PAYMENT: "Pending Payment",
   PAID: "Paid",
+  FAILED: "Failed",
+  EXPIRED: "Expired",
   COMPLETED: "Completed",
   REFUNDED: "Refunded",
   CANCELLED: "Cancelled",

@@ -17,6 +17,8 @@ datasource db {
 enum OrderStatus {
   PENDING_PAYMENT
   PAID
+  FAILED
+  EXPIRED
   COMPLETED
   REFUNDED
   CANCELLED
@@ -80,13 +82,16 @@ model Photo {
 }
 
 model Order {
-  id          String  @id @default(cuid())
-  orderNumber String  @unique // e.g. FLOOY-48372
-  checkoutKey String? @unique // client-generated idempotency key
-  eventId     String?
-  event       Event?  @relation(fields: [eventId], references: [id], onDelete: SetNull)
-  productType String  @default("PHOTOS")
-  currency    String  @default("EUR")
+  id                String  @id @default(cuid())
+  orderNumber       String  @unique // e.g. FLOOY-48372
+  checkoutKey       String? @unique // client-generated idempotency key
+  sumupCheckoutId   String? @unique
+  sumupCheckoutUrl  String?
+  checkoutReference String? @unique
+  eventId           String?
+  event             Event?  @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  productType       String  @default("PHOTOS")
+  currency          String  @default("EUR")
 
   customerName  String
   customerEmail String?
@@ -96,10 +101,11 @@ model Order {
   // Snapshot of total in euro cents at time of order.
   totalAmount Int         @default(0)
 
-  paidAt      DateTime?
-  completedAt DateTime?
-  refundedAt  DateTime?
-  cancelledAt DateTime?
+  paidAt            DateTime?
+  paymentVerifiedAt DateTime?
+  completedAt       DateTime?
+  refundedAt        DateTime?
+  cancelledAt       DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { toast } from "sonner"
-import { Download, Loader2, MapPin, Copy, Check } from "lucide-react"
+import { Download, Loader2, CreditCard, Copy, Check } from "lucide-react"
 import type { PublicOrderDTO } from "@/types"
 import { Button } from "@/components/ui/button"
 import { formatPrice, formatDateTime } from "@/lib/format"
@@ -105,13 +105,12 @@ export function OrderStatusView({ order }: { order: PublicOrderDTO }) {
 
         {order.status === "PENDING_PAYMENT" && (
           <div className="mt-6 flex items-start gap-3 rounded-2xl bg-accent p-4">
-            <MapPin className="mt-0.5 size-5 shrink-0 text-primary" />
+            <CreditCard className="mt-0.5 size-5 shrink-0 text-primary" />
             <div className="text-sm">
-              <p className="font-medium text-accent-foreground">Pay at the Flooy Photo Desk</p>
+              <p className="font-medium text-accent-foreground">Waiting for SumUp confirmation</p>
               <p className="mt-1 text-muted-foreground">
-                Show order <span className="font-mono font-medium">{order.orderNumber}</span> to a
-                member of staff. Once payment is confirmed, your downloads unlock instantly on this
-                page.
+                Order <span className="font-mono font-medium">{order.orderNumber}</span> remains locked
+                until the server verifies the payment directly with SumUp.
               </p>
             </div>
           </div>

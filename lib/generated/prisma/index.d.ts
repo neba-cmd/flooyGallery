@@ -61,6 +61,8 @@ export namespace $Enums {
   export const OrderStatus: {
   PENDING_PAYMENT: 'PENDING_PAYMENT',
   PAID: 'PAID',
+  FAILED: 'FAILED',
+  EXPIRED: 'EXPIRED',
   COMPLETED: 'COMPLETED',
   REFUNDED: 'REFUNDED',
   CANCELLED: 'CANCELLED'
@@ -4195,6 +4197,9 @@ export namespace Prisma {
     id: string | null
     orderNumber: string | null
     checkoutKey: string | null
+    sumupCheckoutId: string | null
+    sumupCheckoutUrl: string | null
+    checkoutReference: string | null
     eventId: string | null
     productType: string | null
     currency: string | null
@@ -4204,6 +4209,7 @@ export namespace Prisma {
     status: $Enums.OrderStatus | null
     totalAmount: number | null
     paidAt: Date | null
+    paymentVerifiedAt: Date | null
     completedAt: Date | null
     refundedAt: Date | null
     cancelledAt: Date | null
@@ -4215,6 +4221,9 @@ export namespace Prisma {
     id: string | null
     orderNumber: string | null
     checkoutKey: string | null
+    sumupCheckoutId: string | null
+    sumupCheckoutUrl: string | null
+    checkoutReference: string | null
     eventId: string | null
     productType: string | null
     currency: string | null
@@ -4224,6 +4233,7 @@ export namespace Prisma {
     status: $Enums.OrderStatus | null
     totalAmount: number | null
     paidAt: Date | null
+    paymentVerifiedAt: Date | null
     completedAt: Date | null
     refundedAt: Date | null
     cancelledAt: Date | null
@@ -4235,6 +4245,9 @@ export namespace Prisma {
     id: number
     orderNumber: number
     checkoutKey: number
+    sumupCheckoutId: number
+    sumupCheckoutUrl: number
+    checkoutReference: number
     eventId: number
     productType: number
     currency: number
@@ -4244,6 +4257,7 @@ export namespace Prisma {
     status: number
     totalAmount: number
     paidAt: number
+    paymentVerifiedAt: number
     completedAt: number
     refundedAt: number
     cancelledAt: number
@@ -4265,6 +4279,9 @@ export namespace Prisma {
     id?: true
     orderNumber?: true
     checkoutKey?: true
+    sumupCheckoutId?: true
+    sumupCheckoutUrl?: true
+    checkoutReference?: true
     eventId?: true
     productType?: true
     currency?: true
@@ -4274,6 +4291,7 @@ export namespace Prisma {
     status?: true
     totalAmount?: true
     paidAt?: true
+    paymentVerifiedAt?: true
     completedAt?: true
     refundedAt?: true
     cancelledAt?: true
@@ -4285,6 +4303,9 @@ export namespace Prisma {
     id?: true
     orderNumber?: true
     checkoutKey?: true
+    sumupCheckoutId?: true
+    sumupCheckoutUrl?: true
+    checkoutReference?: true
     eventId?: true
     productType?: true
     currency?: true
@@ -4294,6 +4315,7 @@ export namespace Prisma {
     status?: true
     totalAmount?: true
     paidAt?: true
+    paymentVerifiedAt?: true
     completedAt?: true
     refundedAt?: true
     cancelledAt?: true
@@ -4305,6 +4327,9 @@ export namespace Prisma {
     id?: true
     orderNumber?: true
     checkoutKey?: true
+    sumupCheckoutId?: true
+    sumupCheckoutUrl?: true
+    checkoutReference?: true
     eventId?: true
     productType?: true
     currency?: true
@@ -4314,6 +4339,7 @@ export namespace Prisma {
     status?: true
     totalAmount?: true
     paidAt?: true
+    paymentVerifiedAt?: true
     completedAt?: true
     refundedAt?: true
     cancelledAt?: true
@@ -4412,6 +4438,9 @@ export namespace Prisma {
     id: string
     orderNumber: string
     checkoutKey: string | null
+    sumupCheckoutId: string | null
+    sumupCheckoutUrl: string | null
+    checkoutReference: string | null
     eventId: string | null
     productType: string
     currency: string
@@ -4421,6 +4450,7 @@ export namespace Prisma {
     status: $Enums.OrderStatus
     totalAmount: number
     paidAt: Date | null
+    paymentVerifiedAt: Date | null
     completedAt: Date | null
     refundedAt: Date | null
     cancelledAt: Date | null
@@ -4451,6 +4481,9 @@ export namespace Prisma {
     id?: boolean
     orderNumber?: boolean
     checkoutKey?: boolean
+    sumupCheckoutId?: boolean
+    sumupCheckoutUrl?: boolean
+    checkoutReference?: boolean
     eventId?: boolean
     productType?: boolean
     currency?: boolean
@@ -4460,6 +4493,7 @@ export namespace Prisma {
     status?: boolean
     totalAmount?: boolean
     paidAt?: boolean
+    paymentVerifiedAt?: boolean
     completedAt?: boolean
     refundedAt?: boolean
     cancelledAt?: boolean
@@ -4474,6 +4508,9 @@ export namespace Prisma {
     id?: boolean
     orderNumber?: boolean
     checkoutKey?: boolean
+    sumupCheckoutId?: boolean
+    sumupCheckoutUrl?: boolean
+    checkoutReference?: boolean
     eventId?: boolean
     productType?: boolean
     currency?: boolean
@@ -4483,6 +4520,7 @@ export namespace Prisma {
     status?: boolean
     totalAmount?: boolean
     paidAt?: boolean
+    paymentVerifiedAt?: boolean
     completedAt?: boolean
     refundedAt?: boolean
     cancelledAt?: boolean
@@ -4495,6 +4533,9 @@ export namespace Prisma {
     id?: boolean
     orderNumber?: boolean
     checkoutKey?: boolean
+    sumupCheckoutId?: boolean
+    sumupCheckoutUrl?: boolean
+    checkoutReference?: boolean
     eventId?: boolean
     productType?: boolean
     currency?: boolean
@@ -4504,6 +4545,7 @@ export namespace Prisma {
     status?: boolean
     totalAmount?: boolean
     paidAt?: boolean
+    paymentVerifiedAt?: boolean
     completedAt?: boolean
     refundedAt?: boolean
     cancelledAt?: boolean
@@ -4516,6 +4558,9 @@ export namespace Prisma {
     id?: boolean
     orderNumber?: boolean
     checkoutKey?: boolean
+    sumupCheckoutId?: boolean
+    sumupCheckoutUrl?: boolean
+    checkoutReference?: boolean
     eventId?: boolean
     productType?: boolean
     currency?: boolean
@@ -4525,6 +4570,7 @@ export namespace Prisma {
     status?: boolean
     totalAmount?: boolean
     paidAt?: boolean
+    paymentVerifiedAt?: boolean
     completedAt?: boolean
     refundedAt?: boolean
     cancelledAt?: boolean
@@ -4532,7 +4578,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderNumber" | "checkoutKey" | "eventId" | "productType" | "currency" | "customerName" | "customerEmail" | "customerPhone" | "status" | "totalAmount" | "paidAt" | "completedAt" | "refundedAt" | "cancelledAt" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
+  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderNumber" | "checkoutKey" | "sumupCheckoutId" | "sumupCheckoutUrl" | "checkoutReference" | "eventId" | "productType" | "currency" | "customerName" | "customerEmail" | "customerPhone" | "status" | "totalAmount" | "paidAt" | "paymentVerifiedAt" | "completedAt" | "refundedAt" | "cancelledAt" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
   export type OrderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     event?: boolean | Order$eventArgs<ExtArgs>
     items?: boolean | Order$itemsArgs<ExtArgs>
@@ -4555,6 +4601,9 @@ export namespace Prisma {
       id: string
       orderNumber: string
       checkoutKey: string | null
+      sumupCheckoutId: string | null
+      sumupCheckoutUrl: string | null
+      checkoutReference: string | null
       eventId: string | null
       productType: string
       currency: string
@@ -4564,6 +4613,7 @@ export namespace Prisma {
       status: $Enums.OrderStatus
       totalAmount: number
       paidAt: Date | null
+      paymentVerifiedAt: Date | null
       completedAt: Date | null
       refundedAt: Date | null
       cancelledAt: Date | null
@@ -4997,6 +5047,9 @@ export namespace Prisma {
     readonly id: FieldRef<"Order", 'String'>
     readonly orderNumber: FieldRef<"Order", 'String'>
     readonly checkoutKey: FieldRef<"Order", 'String'>
+    readonly sumupCheckoutId: FieldRef<"Order", 'String'>
+    readonly sumupCheckoutUrl: FieldRef<"Order", 'String'>
+    readonly checkoutReference: FieldRef<"Order", 'String'>
     readonly eventId: FieldRef<"Order", 'String'>
     readonly productType: FieldRef<"Order", 'String'>
     readonly currency: FieldRef<"Order", 'String'>
@@ -5006,6 +5059,7 @@ export namespace Prisma {
     readonly status: FieldRef<"Order", 'OrderStatus'>
     readonly totalAmount: FieldRef<"Order", 'Int'>
     readonly paidAt: FieldRef<"Order", 'DateTime'>
+    readonly paymentVerifiedAt: FieldRef<"Order", 'DateTime'>
     readonly completedAt: FieldRef<"Order", 'DateTime'>
     readonly refundedAt: FieldRef<"Order", 'DateTime'>
     readonly cancelledAt: FieldRef<"Order", 'DateTime'>
@@ -11057,6 +11111,9 @@ export namespace Prisma {
     id: 'id',
     orderNumber: 'orderNumber',
     checkoutKey: 'checkoutKey',
+    sumupCheckoutId: 'sumupCheckoutId',
+    sumupCheckoutUrl: 'sumupCheckoutUrl',
+    checkoutReference: 'checkoutReference',
     eventId: 'eventId',
     productType: 'productType',
     currency: 'currency',
@@ -11066,6 +11123,7 @@ export namespace Prisma {
     status: 'status',
     totalAmount: 'totalAmount',
     paidAt: 'paidAt',
+    paymentVerifiedAt: 'paymentVerifiedAt',
     completedAt: 'completedAt',
     refundedAt: 'refundedAt',
     cancelledAt: 'cancelledAt',
@@ -11458,6 +11516,9 @@ export namespace Prisma {
     id?: StringFilter<"Order"> | string
     orderNumber?: StringFilter<"Order"> | string
     checkoutKey?: StringNullableFilter<"Order"> | string | null
+    sumupCheckoutId?: StringNullableFilter<"Order"> | string | null
+    sumupCheckoutUrl?: StringNullableFilter<"Order"> | string | null
+    checkoutReference?: StringNullableFilter<"Order"> | string | null
     eventId?: StringNullableFilter<"Order"> | string | null
     productType?: StringFilter<"Order"> | string
     currency?: StringFilter<"Order"> | string
@@ -11467,6 +11528,7 @@ export namespace Prisma {
     status?: EnumOrderStatusFilter<"Order"> | $Enums.OrderStatus
     totalAmount?: IntFilter<"Order"> | number
     paidAt?: DateTimeNullableFilter<"Order"> | Date | string | null
+    paymentVerifiedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
     completedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
     refundedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
     cancelledAt?: DateTimeNullableFilter<"Order"> | Date | string | null
@@ -11480,6 +11542,9 @@ export namespace Prisma {
     id?: SortOrder
     orderNumber?: SortOrder
     checkoutKey?: SortOrderInput | SortOrder
+    sumupCheckoutId?: SortOrderInput | SortOrder
+    sumupCheckoutUrl?: SortOrderInput | SortOrder
+    checkoutReference?: SortOrderInput | SortOrder
     eventId?: SortOrderInput | SortOrder
     productType?: SortOrder
     currency?: SortOrder
@@ -11489,6 +11554,7 @@ export namespace Prisma {
     status?: SortOrder
     totalAmount?: SortOrder
     paidAt?: SortOrderInput | SortOrder
+    paymentVerifiedAt?: SortOrderInput | SortOrder
     completedAt?: SortOrderInput | SortOrder
     refundedAt?: SortOrderInput | SortOrder
     cancelledAt?: SortOrderInput | SortOrder
@@ -11502,9 +11568,12 @@ export namespace Prisma {
     id?: string
     orderNumber?: string
     checkoutKey?: string
+    sumupCheckoutId?: string
+    checkoutReference?: string
     AND?: OrderWhereInput | OrderWhereInput[]
     OR?: OrderWhereInput[]
     NOT?: OrderWhereInput | OrderWhereInput[]
+    sumupCheckoutUrl?: StringNullableFilter<"Order"> | string | null
     eventId?: StringNullableFilter<"Order"> | string | null
     productType?: StringFilter<"Order"> | string
     currency?: StringFilter<"Order"> | string
@@ -11514,6 +11583,7 @@ export namespace Prisma {
     status?: EnumOrderStatusFilter<"Order"> | $Enums.OrderStatus
     totalAmount?: IntFilter<"Order"> | number
     paidAt?: DateTimeNullableFilter<"Order"> | Date | string | null
+    paymentVerifiedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
     completedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
     refundedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
     cancelledAt?: DateTimeNullableFilter<"Order"> | Date | string | null
@@ -11521,12 +11591,15 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Order"> | Date | string
     event?: XOR<EventNullableScalarRelationFilter, EventWhereInput> | null
     items?: OrderItemListRelationFilter
-  }, "id" | "orderNumber" | "checkoutKey">
+  }, "id" | "orderNumber" | "checkoutKey" | "sumupCheckoutId" | "checkoutReference">
 
   export type OrderOrderByWithAggregationInput = {
     id?: SortOrder
     orderNumber?: SortOrder
     checkoutKey?: SortOrderInput | SortOrder
+    sumupCheckoutId?: SortOrderInput | SortOrder
+    sumupCheckoutUrl?: SortOrderInput | SortOrder
+    checkoutReference?: SortOrderInput | SortOrder
     eventId?: SortOrderInput | SortOrder
     productType?: SortOrder
     currency?: SortOrder
@@ -11536,6 +11609,7 @@ export namespace Prisma {
     status?: SortOrder
     totalAmount?: SortOrder
     paidAt?: SortOrderInput | SortOrder
+    paymentVerifiedAt?: SortOrderInput | SortOrder
     completedAt?: SortOrderInput | SortOrder
     refundedAt?: SortOrderInput | SortOrder
     cancelledAt?: SortOrderInput | SortOrder
@@ -11555,6 +11629,9 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Order"> | string
     orderNumber?: StringWithAggregatesFilter<"Order"> | string
     checkoutKey?: StringNullableWithAggregatesFilter<"Order"> | string | null
+    sumupCheckoutId?: StringNullableWithAggregatesFilter<"Order"> | string | null
+    sumupCheckoutUrl?: StringNullableWithAggregatesFilter<"Order"> | string | null
+    checkoutReference?: StringNullableWithAggregatesFilter<"Order"> | string | null
     eventId?: StringNullableWithAggregatesFilter<"Order"> | string | null
     productType?: StringWithAggregatesFilter<"Order"> | string
     currency?: StringWithAggregatesFilter<"Order"> | string
@@ -11564,6 +11641,7 @@ export namespace Prisma {
     status?: EnumOrderStatusWithAggregatesFilter<"Order"> | $Enums.OrderStatus
     totalAmount?: IntWithAggregatesFilter<"Order"> | number
     paidAt?: DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
+    paymentVerifiedAt?: DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
     completedAt?: DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
     refundedAt?: DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
     cancelledAt?: DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
@@ -12160,6 +12238,9 @@ export namespace Prisma {
     id?: string
     orderNumber: string
     checkoutKey?: string | null
+    sumupCheckoutId?: string | null
+    sumupCheckoutUrl?: string | null
+    checkoutReference?: string | null
     productType?: string
     currency?: string
     customerName: string
@@ -12168,6 +12249,7 @@ export namespace Prisma {
     status?: $Enums.OrderStatus
     totalAmount?: number
     paidAt?: Date | string | null
+    paymentVerifiedAt?: Date | string | null
     completedAt?: Date | string | null
     refundedAt?: Date | string | null
     cancelledAt?: Date | string | null
@@ -12181,6 +12263,9 @@ export namespace Prisma {
     id?: string
     orderNumber: string
     checkoutKey?: string | null
+    sumupCheckoutId?: string | null
+    sumupCheckoutUrl?: string | null
+    checkoutReference?: string | null
     eventId?: string | null
     productType?: string
     currency?: string
@@ -12190,6 +12275,7 @@ export namespace Prisma {
     status?: $Enums.OrderStatus
     totalAmount?: number
     paidAt?: Date | string | null
+    paymentVerifiedAt?: Date | string | null
     completedAt?: Date | string | null
     refundedAt?: Date | string | null
     cancelledAt?: Date | string | null
@@ -12202,6 +12288,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     orderNumber?: StringFieldUpdateOperationsInput | string
     checkoutKey?: NullableStringFieldUpdateOperationsInput | string | null
+    sumupCheckoutId?: NullableStringFieldUpdateOperationsInput | string | null
+    sumupCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutReference?: NullableStringFieldUpdateOperationsInput | string | null
     productType?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     customerName?: StringFieldUpdateOperationsInput | string
@@ -12210,6 +12299,7 @@ export namespace Prisma {
     status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
     totalAmount?: IntFieldUpdateOperationsInput | number
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -12223,6 +12313,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     orderNumber?: StringFieldUpdateOperationsInput | string
     checkoutKey?: NullableStringFieldUpdateOperationsInput | string | null
+    sumupCheckoutId?: NullableStringFieldUpdateOperationsInput | string | null
+    sumupCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutReference?: NullableStringFieldUpdateOperationsInput | string | null
     eventId?: NullableStringFieldUpdateOperationsInput | string | null
     productType?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
@@ -12232,6 +12325,7 @@ export namespace Prisma {
     status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
     totalAmount?: IntFieldUpdateOperationsInput | number
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -12244,6 +12338,9 @@ export namespace Prisma {
     id?: string
     orderNumber: string
     checkoutKey?: string | null
+    sumupCheckoutId?: string | null
+    sumupCheckoutUrl?: string | null
+    checkoutReference?: string | null
     eventId?: string | null
     productType?: string
     currency?: string
@@ -12253,6 +12350,7 @@ export namespace Prisma {
     status?: $Enums.OrderStatus
     totalAmount?: number
     paidAt?: Date | string | null
+    paymentVerifiedAt?: Date | string | null
     completedAt?: Date | string | null
     refundedAt?: Date | string | null
     cancelledAt?: Date | string | null
@@ -12264,6 +12362,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     orderNumber?: StringFieldUpdateOperationsInput | string
     checkoutKey?: NullableStringFieldUpdateOperationsInput | string | null
+    sumupCheckoutId?: NullableStringFieldUpdateOperationsInput | string | null
+    sumupCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutReference?: NullableStringFieldUpdateOperationsInput | string | null
     productType?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     customerName?: StringFieldUpdateOperationsInput | string
@@ -12272,6 +12373,7 @@ export namespace Prisma {
     status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
     totalAmount?: IntFieldUpdateOperationsInput | number
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -12283,6 +12385,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     orderNumber?: StringFieldUpdateOperationsInput | string
     checkoutKey?: NullableStringFieldUpdateOperationsInput | string | null
+    sumupCheckoutId?: NullableStringFieldUpdateOperationsInput | string | null
+    sumupCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutReference?: NullableStringFieldUpdateOperationsInput | string | null
     eventId?: NullableStringFieldUpdateOperationsInput | string | null
     productType?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
@@ -12292,6 +12397,7 @@ export namespace Prisma {
     status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
     totalAmount?: IntFieldUpdateOperationsInput | number
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -13051,6 +13157,9 @@ export namespace Prisma {
     id?: SortOrder
     orderNumber?: SortOrder
     checkoutKey?: SortOrder
+    sumupCheckoutId?: SortOrder
+    sumupCheckoutUrl?: SortOrder
+    checkoutReference?: SortOrder
     eventId?: SortOrder
     productType?: SortOrder
     currency?: SortOrder
@@ -13060,6 +13169,7 @@ export namespace Prisma {
     status?: SortOrder
     totalAmount?: SortOrder
     paidAt?: SortOrder
+    paymentVerifiedAt?: SortOrder
     completedAt?: SortOrder
     refundedAt?: SortOrder
     cancelledAt?: SortOrder
@@ -13075,6 +13185,9 @@ export namespace Prisma {
     id?: SortOrder
     orderNumber?: SortOrder
     checkoutKey?: SortOrder
+    sumupCheckoutId?: SortOrder
+    sumupCheckoutUrl?: SortOrder
+    checkoutReference?: SortOrder
     eventId?: SortOrder
     productType?: SortOrder
     currency?: SortOrder
@@ -13084,6 +13197,7 @@ export namespace Prisma {
     status?: SortOrder
     totalAmount?: SortOrder
     paidAt?: SortOrder
+    paymentVerifiedAt?: SortOrder
     completedAt?: SortOrder
     refundedAt?: SortOrder
     cancelledAt?: SortOrder
@@ -13095,6 +13209,9 @@ export namespace Prisma {
     id?: SortOrder
     orderNumber?: SortOrder
     checkoutKey?: SortOrder
+    sumupCheckoutId?: SortOrder
+    sumupCheckoutUrl?: SortOrder
+    checkoutReference?: SortOrder
     eventId?: SortOrder
     productType?: SortOrder
     currency?: SortOrder
@@ -13104,6 +13221,7 @@ export namespace Prisma {
     status?: SortOrder
     totalAmount?: SortOrder
     paidAt?: SortOrder
+    paymentVerifiedAt?: SortOrder
     completedAt?: SortOrder
     refundedAt?: SortOrder
     cancelledAt?: SortOrder
@@ -13989,6 +14107,9 @@ export namespace Prisma {
     id?: string
     orderNumber: string
     checkoutKey?: string | null
+    sumupCheckoutId?: string | null
+    sumupCheckoutUrl?: string | null
+    checkoutReference?: string | null
     productType?: string
     currency?: string
     customerName: string
@@ -13997,6 +14118,7 @@ export namespace Prisma {
     status?: $Enums.OrderStatus
     totalAmount?: number
     paidAt?: Date | string | null
+    paymentVerifiedAt?: Date | string | null
     completedAt?: Date | string | null
     refundedAt?: Date | string | null
     cancelledAt?: Date | string | null
@@ -14009,6 +14131,9 @@ export namespace Prisma {
     id?: string
     orderNumber: string
     checkoutKey?: string | null
+    sumupCheckoutId?: string | null
+    sumupCheckoutUrl?: string | null
+    checkoutReference?: string | null
     productType?: string
     currency?: string
     customerName: string
@@ -14017,6 +14142,7 @@ export namespace Prisma {
     status?: $Enums.OrderStatus
     totalAmount?: number
     paidAt?: Date | string | null
+    paymentVerifiedAt?: Date | string | null
     completedAt?: Date | string | null
     refundedAt?: Date | string | null
     cancelledAt?: Date | string | null
@@ -14095,6 +14221,9 @@ export namespace Prisma {
     id?: StringFilter<"Order"> | string
     orderNumber?: StringFilter<"Order"> | string
     checkoutKey?: StringNullableFilter<"Order"> | string | null
+    sumupCheckoutId?: StringNullableFilter<"Order"> | string | null
+    sumupCheckoutUrl?: StringNullableFilter<"Order"> | string | null
+    checkoutReference?: StringNullableFilter<"Order"> | string | null
     eventId?: StringNullableFilter<"Order"> | string | null
     productType?: StringFilter<"Order"> | string
     currency?: StringFilter<"Order"> | string
@@ -14104,6 +14233,7 @@ export namespace Prisma {
     status?: EnumOrderStatusFilter<"Order"> | $Enums.OrderStatus
     totalAmount?: IntFilter<"Order"> | number
     paidAt?: DateTimeNullableFilter<"Order"> | Date | string | null
+    paymentVerifiedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
     completedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
     refundedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
     cancelledAt?: DateTimeNullableFilter<"Order"> | Date | string | null
@@ -14350,6 +14480,9 @@ export namespace Prisma {
     id?: string
     orderNumber: string
     checkoutKey?: string | null
+    sumupCheckoutId?: string | null
+    sumupCheckoutUrl?: string | null
+    checkoutReference?: string | null
     productType?: string
     currency?: string
     customerName: string
@@ -14358,6 +14491,7 @@ export namespace Prisma {
     status?: $Enums.OrderStatus
     totalAmount?: number
     paidAt?: Date | string | null
+    paymentVerifiedAt?: Date | string | null
     completedAt?: Date | string | null
     refundedAt?: Date | string | null
     cancelledAt?: Date | string | null
@@ -14370,6 +14504,9 @@ export namespace Prisma {
     id?: string
     orderNumber: string
     checkoutKey?: string | null
+    sumupCheckoutId?: string | null
+    sumupCheckoutUrl?: string | null
+    checkoutReference?: string | null
     eventId?: string | null
     productType?: string
     currency?: string
@@ -14379,6 +14516,7 @@ export namespace Prisma {
     status?: $Enums.OrderStatus
     totalAmount?: number
     paidAt?: Date | string | null
+    paymentVerifiedAt?: Date | string | null
     completedAt?: Date | string | null
     refundedAt?: Date | string | null
     cancelledAt?: Date | string | null
@@ -14447,6 +14585,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     orderNumber?: StringFieldUpdateOperationsInput | string
     checkoutKey?: NullableStringFieldUpdateOperationsInput | string | null
+    sumupCheckoutId?: NullableStringFieldUpdateOperationsInput | string | null
+    sumupCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutReference?: NullableStringFieldUpdateOperationsInput | string | null
     productType?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     customerName?: StringFieldUpdateOperationsInput | string
@@ -14455,6 +14596,7 @@ export namespace Prisma {
     status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
     totalAmount?: IntFieldUpdateOperationsInput | number
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -14467,6 +14609,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     orderNumber?: StringFieldUpdateOperationsInput | string
     checkoutKey?: NullableStringFieldUpdateOperationsInput | string | null
+    sumupCheckoutId?: NullableStringFieldUpdateOperationsInput | string | null
+    sumupCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutReference?: NullableStringFieldUpdateOperationsInput | string | null
     eventId?: NullableStringFieldUpdateOperationsInput | string | null
     productType?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
@@ -14476,6 +14621,7 @@ export namespace Prisma {
     status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
     totalAmount?: IntFieldUpdateOperationsInput | number
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -14814,6 +14960,9 @@ export namespace Prisma {
     id?: string
     orderNumber: string
     checkoutKey?: string | null
+    sumupCheckoutId?: string | null
+    sumupCheckoutUrl?: string | null
+    checkoutReference?: string | null
     productType?: string
     currency?: string
     customerName: string
@@ -14822,6 +14971,7 @@ export namespace Prisma {
     status?: $Enums.OrderStatus
     totalAmount?: number
     paidAt?: Date | string | null
+    paymentVerifiedAt?: Date | string | null
     completedAt?: Date | string | null
     refundedAt?: Date | string | null
     cancelledAt?: Date | string | null
@@ -14886,6 +15036,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     orderNumber?: StringFieldUpdateOperationsInput | string
     checkoutKey?: NullableStringFieldUpdateOperationsInput | string | null
+    sumupCheckoutId?: NullableStringFieldUpdateOperationsInput | string | null
+    sumupCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutReference?: NullableStringFieldUpdateOperationsInput | string | null
     productType?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     customerName?: StringFieldUpdateOperationsInput | string
@@ -14894,6 +15047,7 @@ export namespace Prisma {
     status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
     totalAmount?: IntFieldUpdateOperationsInput | number
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -14906,6 +15060,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     orderNumber?: StringFieldUpdateOperationsInput | string
     checkoutKey?: NullableStringFieldUpdateOperationsInput | string | null
+    sumupCheckoutId?: NullableStringFieldUpdateOperationsInput | string | null
+    sumupCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutReference?: NullableStringFieldUpdateOperationsInput | string | null
     productType?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     customerName?: StringFieldUpdateOperationsInput | string
@@ -14914,6 +15071,7 @@ export namespace Prisma {
     status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
     totalAmount?: IntFieldUpdateOperationsInput | number
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -14926,6 +15084,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     orderNumber?: StringFieldUpdateOperationsInput | string
     checkoutKey?: NullableStringFieldUpdateOperationsInput | string | null
+    sumupCheckoutId?: NullableStringFieldUpdateOperationsInput | string | null
+    sumupCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutReference?: NullableStringFieldUpdateOperationsInput | string | null
     productType?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     customerName?: StringFieldUpdateOperationsInput | string
@@ -14934,6 +15095,7 @@ export namespace Prisma {
     status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
     totalAmount?: IntFieldUpdateOperationsInput | number
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null

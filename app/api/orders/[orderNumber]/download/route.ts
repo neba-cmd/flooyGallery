@@ -26,6 +26,7 @@ export async function GET(
       "Order not found",
       "This order is not paid yet",
       "Download not available for this order",
+      "The original file is temporarily unavailable",
     ])
     const message =
       error instanceof Error && known.has(error.message)

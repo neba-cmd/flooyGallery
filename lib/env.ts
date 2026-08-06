@@ -57,7 +57,15 @@ export const env = {
       .map((value) => origin(value, "BETTER_AUTH_TRUSTED_ORIGINS")) ?? []
     return [...new Set([this.betterAuthUrl, ...configured])]
   },
-  appUrl: optional("NEXT_PUBLIC_APP_URL") ?? "http://localhost:3000",
+  get appUrl() {
+    return origin(optional("NEXT_PUBLIC_APP_URL") ?? "http://localhost:3000", "NEXT_PUBLIC_APP_URL")
+  },
+  get sumupApiKey() {
+    return requiredEnv("SUMUP_API_KEY")
+  },
+  get sumupMerchantCode() {
+    return requiredEnv("SUMUP_MERCHANT_CODE")
+  },
 }
 
 export const r2Env = {

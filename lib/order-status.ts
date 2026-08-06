@@ -12,7 +12,7 @@ type StatusConfig = {
 export const ORDER_STATUS: Record<OrderStatus, StatusConfig> = {
   PENDING_PAYMENT: {
     label: "Pending Payment",
-    description: "Visit the Flooy Photo Desk with your order number to complete payment.",
+    description: "Waiting for SumUp to confirm this payment.",
     badgeClass: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
     downloadable: false,
   },
@@ -21,6 +21,18 @@ export const ORDER_STATUS: Record<OrderStatus, StatusConfig> = {
     description: "Payment confirmed. Your high-resolution downloads are ready below.",
     badgeClass: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
     downloadable: true,
+  },
+  FAILED: {
+    label: "Payment Failed",
+    description: "The payment was not completed. Your originals remain locked.",
+    badgeClass: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30",
+    downloadable: false,
+  },
+  EXPIRED: {
+    label: "Expired",
+    description: "This payment session expired. Your originals remain locked.",
+    badgeClass: "bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-500/30",
+    downloadable: false,
   },
   COMPLETED: {
     label: "Completed",
@@ -45,6 +57,8 @@ export const ORDER_STATUS: Record<OrderStatus, StatusConfig> = {
 export const ORDER_STATUS_LIST: OrderStatus[] = [
   "PENDING_PAYMENT",
   "PAID",
+  "FAILED",
+  "EXPIRED",
   "COMPLETED",
   "REFUNDED",
   "CANCELLED",

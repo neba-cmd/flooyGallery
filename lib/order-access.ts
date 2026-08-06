@@ -32,7 +32,9 @@ export function verifyOrderAccessToken(orderNumber: string, token: string | unde
 export const orderAccessCookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: "strict" as const,
+  // Checkout returns from a different site, so the access cookie must be sent
+  // on that top-level GET navigation. It remains HttpOnly and Secure.
+  sameSite: "lax" as const,
   path: "/",
   maxAge: ACCESS_MAX_AGE_SECONDS,
 }

@@ -6,7 +6,7 @@ import type { OrderDTO } from "@/types"
 import { Prisma, type OrderStatus } from "@/lib/generated/prisma/client"
 import { calculatePhotoPricing, TEAM_PACKAGE_PRICE } from "@/lib/pricing"
 
-const DOWNLOAD_TTL_SECONDS = 300
+const DOWNLOAD_TTL_SECONDS = 90
 
 export type CreateOrderInput = {
   customerName: string
@@ -15,6 +15,7 @@ export type CreateOrderInput = {
   photoIds?: string[]
   productType?: "PHOTOS" | "TEAM_PACKAGE"
   checkoutKey?: string
+  checkoutReference?: string
 }
 
 /**
@@ -69,6 +70,7 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderDTO> {
         data: {
           orderNumber,
           checkoutKey: input.checkoutKey,
+          checkoutReference: input.checkoutReference,
           eventId,
           customerName: input.customerName.trim(),
           customerEmail: input.customerEmail?.trim() || null,
@@ -106,6 +108,7 @@ async function createTeamPackageOrder(input: CreateOrderInput): Promise<OrderDTO
         data: {
           orderNumber,
           checkoutKey: input.checkoutKey,
+          checkoutReference: input.checkoutReference,
           productType: "TEAM_PACKAGE",
           currency: "GBP",
           customerName: input.customerName.trim(),
@@ -170,8 +173,12 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus): P
   const current = await prisma.order.findUnique({ where: { id: orderId }, select: { status: true } })
   if (!current) throw new Error("Order not found")
   const allowed: Record<OrderStatus, OrderStatus[]> = {
-    PENDING_PAYMENT: ["PAID", "CANCELLED"],
+    // Online orders can become PAID only through verified SumUp state in the
+    // payment service, never through a generic/admin status mutation.
+    PENDING_PAYMENT: ["FAILED", "EXPIRED", "CANCELLED"],
     PAID: ["COMPLETED", "REFUNDED"],
+    FAILED: ["PENDING_PAYMENT"],
+    EXPIRED: ["PENDING_PAYMENT"],
     COMPLETED: ["PAID", "REFUNDED"],
     REFUNDED: [],
     CANCELLED: ["PENDING_PAYMENT"],
@@ -264,14 +271,19 @@ export async function getSignedDownloadUrls(orderNumber: string) {
   if (order.items.length === 0) throw new Error("Download not available for this order")
 
   return Promise.all(
-    order.items.map(async (item) => ({
-      itemId: item.id,
-      filename: item.photo.filename,
-      url: await createDownloadUrl(
-        item.photo.originalKey,
-        item.photo.filename,
-        DOWNLOAD_TTL_SECONDS,
-      ),
-    })),
+    order.items.map(async (item) => {
+      if (!(await objectExists(item.photo.originalKey))) {
+        throw new Error("The original file is temporarily unavailable")
+      }
+      return {
+        itemId: item.id,
+        filename: item.photo.filename,
+        url: await createDownloadUrl(
+          item.photo.originalKey,
+          item.photo.filename,
+          DOWNLOAD_TTL_SECONDS,
+        ),
+      }
+    }),
   )
 }

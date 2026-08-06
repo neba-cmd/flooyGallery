@@ -10,7 +10,7 @@ import { Prisma } from "@/lib/generated/prisma/client"
 import { deleteObjects } from "@/lib/storage/r2"
 import { isStorageConfigured } from "@/lib/env"
 
-const VALID: OrderStatus[] = ["PENDING_PAYMENT", "PAID", "COMPLETED", "REFUNDED", "CANCELLED"]
+const VALID: OrderStatus[] = ["PENDING_PAYMENT", "PAID", "FAILED", "EXPIRED", "COMPLETED", "REFUNDED", "CANCELLED"]
 
 export async function setOrderStatusAction(orderId: string, status: OrderStatus) {
   await requireAdmin()

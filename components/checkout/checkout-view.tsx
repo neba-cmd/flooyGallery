@@ -1,7 +1,6 @@
 "use client"
 
 import { useRef, useState } from "react"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { toast } from "sonner"
 import { Check, Loader2, Users } from "lucide-react"
@@ -15,8 +14,7 @@ import { PricingSummary } from "@/components/checkout/pricing-summary"
 import { TEAM_PACKAGE_PRICE } from "@/lib/pricing"
 
 export function CheckoutView({ productType }: { productType: "PHOTOS" | "TEAM_PACKAGE" }) {
-  const router = useRouter()
-  const { items, total, originalTotal, discount, bundleCount, count, clear } = useCart()
+  const { items, total, originalTotal, discount, bundleCount, count } = useCart()
   const isTeamPackage = productType === "TEAM_PACKAGE"
   const [submitting, setSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -76,8 +74,8 @@ export function CheckoutView({ productType }: { productType: "PHOTOS" | "TEAM_PA
       if (!res.ok) {
         throw new Error(data.error ?? "Checkout failed")
       }
-      if (!isTeamPackage) clear()
-      router.push(`/orders/${data.order.orderNumber}`)
+      if (!data.hostedCheckoutUrl) throw new Error("Payment page is unavailable")
+      window.location.assign(data.hostedCheckoutUrl)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Checkout failed")
       setSubmitting(false)
@@ -88,7 +86,7 @@ export function CheckoutView({ productType }: { productType: "PHOTOS" | "TEAM_PA
     <div>
       <h1 className="text-2xl font-semibold tracking-tight">Checkout</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Confirm your details below. We&apos;ll generate an order number to pay at the desk.
+        Confirm your details below, then continue to SumUp&apos;s secure payment page.
       </p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_18rem]">
@@ -123,15 +121,14 @@ export function CheckoutView({ productType }: { productType: "PHOTOS" | "TEAM_PA
             {submitting ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
-                Creating order...
+                Opening secure payment...
               </>
             ) : (
-              "Generate order number"
+              "Pay securely with SumUp"
             )}
           </Button>
           <p className="mt-4 text-center text-xs leading-relaxed text-muted-foreground">
-            No online payment is taken. Present your order number at the Flooy Photo Desk to pay and
-            unlock downloads.
+            Prices are verified by the server. Downloads unlock only after SumUp confirms payment.
           </p>
         </form>
 

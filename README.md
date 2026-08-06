@@ -71,3 +71,39 @@ npm run build
 R2 presigned upload URLs are issued only to authenticated admins. Browser-side
 processing creates compressed, visibly watermarked previews; short-lived
 presigned GET URLs for originals are issued only for paid/completed order items.
+
+## SumUp Hosted Checkout
+
+Checkout prices are calculated from PostgreSQL before a pending order and SumUp Hosted Checkout
+are created. `SUMUP_API_KEY` is only read by server modules. Both the notification handler and the
+customer return page retrieve the checkout directly from SumUp; neither trusts a webhook body or
+redirect query parameters as proof of payment.
+
+Configure these variables locally and in Vercel:
+
+```bash
+SUMUP_API_KEY="your-server-side-api-key"
+SUMUP_MERCHANT_CODE="your-merchant-code"
+NEXT_PUBLIC_APP_URL="https://your-production-domain.example"
+```
+
+Create a SumUp API key for the configured merchant with the `payments` scope (or
+`checkouts.write` and `checkouts.read`) and enable Hosted Checkout for the account. The application
+provides these URLs on every checkout; they must be publicly reachable over HTTPS:
+
+- Notification (`return_url`): `https://your-production-domain.example/api/webhooks/sumup`
+- Customer return (`redirect_url`): `https://your-production-domain.example/payment-complete`
+
+If SumUp asks for allowlisted callback/redirect URLs, enter those exact URLs. Notifications use the
+`CHECKOUT_STATUS_CHANGED` event. The endpoint returns an empty 2xx response and safely handles
+SumUp retries.
+
+Apply the additive migration before deploying the application code:
+
+```bash
+npm run db:migrate
+```
+
+In SumUp's sandbox, test a successful payment, the documented failure amount, an expired session,
+and duplicate notification delivery. Refund initiation is not included; when a refund is processed
+in SumUp, the local order must also be changed to `REFUNDED` to disable downloads.

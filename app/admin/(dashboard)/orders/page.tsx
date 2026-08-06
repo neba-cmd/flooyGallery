@@ -7,7 +7,7 @@ import { OrderActions } from "@/components/admin/order-actions"
 
 export default async function OrdersPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const params = await searchParams
-  const status = ["PENDING_PAYMENT", "PAID", "COMPLETED", "REFUNDED", "CANCELLED"].includes(params.status ?? "") ? params.status as OrderStatus : undefined
+  const status = ["PENDING_PAYMENT", "PAID", "FAILED", "EXPIRED", "COMPLETED", "REFUNDED", "CANCELLED"].includes(params.status ?? "") ? params.status as OrderStatus : undefined
   const page = Math.max(1, Number(params.page) || 1)
   const [result, events] = await Promise.all([listOrders({ search: params.q, status, eventId: params.event, page }), listAllEvents()])
   const pageUrl = (nextPage: number) => {
@@ -22,7 +22,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
     <div><h1 className="text-2xl font-semibold">Orders</h1><p className="text-sm text-muted-foreground">{result.total} orders</p></div>
     <form className="grid gap-3 rounded-xl border bg-card p-4 sm:grid-cols-[1fr_auto_auto]">
       <input name="q" defaultValue={params.q} placeholder="Order number, name, email or phone" className="h-9 rounded-lg border bg-background px-3 text-sm" />
-      <select name="status" defaultValue={params.status ?? ""} className="h-9 rounded-lg border bg-background px-3 text-sm"><option value="">All statuses</option>{["PENDING_PAYMENT","PAID","COMPLETED","REFUNDED","CANCELLED"].map(s => <option key={s}>{s}</option>)}</select>
+      <select name="status" defaultValue={params.status ?? ""} className="h-9 rounded-lg border bg-background px-3 text-sm"><option value="">All statuses</option>{["PENDING_PAYMENT","PAID","FAILED","EXPIRED","COMPLETED","REFUNDED","CANCELLED"].map(s => <option key={s}>{s}</option>)}</select>
       <select name="event" defaultValue={params.event ?? ""} className="h-9 rounded-lg border bg-background px-3 text-sm"><option value="">All events</option>{events.map(e => <option value={e.id} key={e.id}>{e.name}</option>)}</select>
       <button className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground sm:col-span-3">Apply filters</button>
     </form>
