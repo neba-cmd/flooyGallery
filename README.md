@@ -97,8 +97,8 @@ Subscribe the webhook to `checkout.session.completed`, `checkout.session.async_p
 signing secret into `STRIPE_WEBHOOK_SECRET`. Stripe CLI can forward local events with
 `stripe listen --forward-to localhost:3000/api/webhooks/stripe`.
 
-Apply the provider migration before deploying the application code. Existing order history is
-preserved, but any still-pending SumUp checkout must be started again in Stripe:
+Apply the provider migration before deploying the application code. Existing order history and
+legacy SumUp checkout metadata are preserved, but pending payments must be started again in Stripe:
 
 ```bash
 npm run db:migrate
