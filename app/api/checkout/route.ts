@@ -123,7 +123,11 @@ export async function POST(req: NextRequest) {
     ])
     const message = err instanceof Error && known.has(err.message) ? err.message : "Checkout is temporarily unavailable"
     if (message === "Checkout is temporarily unavailable") {
-      console.error("[checkout] Order creation failed")
+      // Keep provider credentials and response bodies out of logs, while
+      // retaining enough context to diagnose configuration/API failures.
+      console.error("[checkout] Order or SumUp checkout creation failed", {
+        error: err instanceof Error ? err.message : "Unknown error",
+      })
     }
     return NextResponse.json({ error: message }, { status: message.startsWith("Checkout is") ? 503 : 400 })
   }
