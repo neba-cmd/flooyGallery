@@ -1,4 +1,5 @@
 import type { OrderDTO, OrderItemDTO, PhotoDTO, EventDTO, PublicOrderDTO } from "@/types"
+import { resolveStoredPreviewUrl } from "@/lib/storage/r2"
 
 /**
  * Serializers convert Prisma rows (with Date objects and nullable price
@@ -11,6 +12,7 @@ type PhotoRow = {
   filename: string
   photoNumber: number | null
   photographer: string | null
+  previewKey: string
   previewUrl: string
   width: number | null
   height: number | null
@@ -36,7 +38,7 @@ export function serializePhoto(row: PhotoRow): PhotoDTO {
     filename: row.filename,
     photoNumber: row.photoNumber,
     photographer: row.photographer,
-    previewUrl: row.previewUrl,
+    previewUrl: resolveStoredPreviewUrl(row.previewKey, row.previewUrl),
     width: row.width,
     height: row.height,
     fileSize: row.fileSize,

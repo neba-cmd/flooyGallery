@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getObjectStream, isStorageConfigured } from "@/lib/storage/r2"
+import { getObjectStream, isStorageConfigured, resolvePreviewUrl } from "@/lib/storage/r2"
+import { r2Env } from "@/lib/env"
 import { clientKey, rateLimit } from "@/lib/rate-limit"
 
 /**
@@ -26,6 +27,16 @@ export async function GET(
   // Only previews may be proxied. Never expose originals through this route.
   if (!/^events\/[^/]+\/previews\/[^/]+$/.test(key) || key.includes("..")) {
     return NextResponse.json({ error: "Not found" }, { status: 404 })
+  }
+
+  // Old database rows and persisted carts can still contain this route. Once a
+  // public preview domain is configured, redirect those requests to R2 so no
+  // image body crosses the Vercel function.
+  if (r2Env.publicUrl) {
+    return NextResponse.redirect(resolvePreviewUrl(key), {
+      status: 307,
+      headers: { "Cache-Control": "public, max-age=86400" },
+    })
   }
 
   try {

@@ -33,8 +33,8 @@ async function preview(file: File) {
   const blob=await new Promise<Blob|null>(resolve=>canvas.toBlob(resolve,"image/jpeg",.78)); if(!blob) throw new Error("Preview generation failed")
   return { blob,width:image.naturalWidth,height:image.naturalHeight }
 }
-function put(url:string, body:Blob, contentType:string, onProgress:(n:number)=>void, signal:AbortSignal) {
-  return new Promise<void>((resolve,reject)=>{ const xhr=new XMLHttpRequest(); xhr.open("PUT",url); xhr.setRequestHeader("Content-Type",contentType); xhr.upload.onprogress=e=>e.lengthComputable&&onProgress(e.loaded/e.total); xhr.onload=()=>xhr.status>=200&&xhr.status<300?resolve():reject(new Error(`Storage upload failed (${xhr.status})`)); xhr.onerror=()=>reject(new Error("Storage upload failed")); signal.addEventListener("abort",()=>{xhr.abort();reject(new Error("Cancelled"))}); xhr.send(body) })
+function put(url:string, body:Blob, contentType:string, onProgress:(n:number)=>void, signal:AbortSignal, cacheControl?:string) {
+  return new Promise<void>((resolve,reject)=>{ const xhr=new XMLHttpRequest(); xhr.open("PUT",url); xhr.setRequestHeader("Content-Type",contentType); if(cacheControl)xhr.setRequestHeader("Cache-Control",cacheControl); xhr.upload.onprogress=e=>e.lengthComputable&&onProgress(e.loaded/e.total); xhr.onload=()=>xhr.status>=200&&xhr.status<300?resolve():reject(new Error(`Storage upload failed (${xhr.status})`)); xhr.onerror=()=>reject(new Error("Storage upload failed")); signal.addEventListener("abort",()=>{xhr.abort();reject(new Error("Cancelled"))}); xhr.send(body) })
 }
 
 export function PhotoUploader({ events, photographers }: { events:{id:string;name:string}[]; photographers:string[] }) {
@@ -52,7 +52,7 @@ export function PhotoUploader({ events, photographers }: { events:{id:string;nam
       const reportProgress=()=>update(item.id,{progress:Math.round(5+originalProgress*45+previewProgress*45)})
       await Promise.all([
         put(signed.originalUrl,item.file,item.file.type,n=>{originalProgress=n;reportProgress()},controller.signal),
-        put(signed.previewUrl,generated.blob,"image/jpeg",n=>{previewProgress=n;reportProgress()},controller.signal),
+        put(signed.previewUrl,generated.blob,"image/jpeg",n=>{previewProgress=n;reportProgress()},controller.signal,signed.previewCacheControl),
       ])
       const complete=await fetch("/api/admin/uploads/complete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({eventId,photographer,filename:item.file.name,originalKey:signed.originalKey,previewKey:signed.previewKey,width:generated.width,height:generated.height,fileSize:item.file.size}),signal:controller.signal})
       const result=await complete.json(); if(!complete.ok) throw new Error(result.error??"Could not save upload")

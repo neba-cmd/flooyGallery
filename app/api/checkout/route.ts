@@ -76,7 +76,6 @@ export async function POST(req: NextRequest) {
       "Cannot create an order with no photos",
       "None of the selected photos are available",
       "One or more selected photos are no longer available",
-      "Photos from different events must be ordered separately",
       "One or more selected photos has an invalid price",
       "Could not generate a unique order number, please try again",
     ])

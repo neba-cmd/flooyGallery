@@ -48,10 +48,6 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderDTO> {
   if (photos.length !== photoIds.length) {
     throw new Error("One or more selected photos are no longer available")
   }
-  if (new Set(photos.map((photo) => photo.eventId)).size !== 1) {
-    throw new Error("Photos from different events must be ordered separately")
-  }
-
   const items = photos.map((p) => ({
     photoId: p.id,
     unitPrice: effectivePrice(p.price, p.event.defaultPrice),
@@ -60,7 +56,11 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderDTO> {
     throw new Error("One or more selected photos has an invalid price")
   }
   const totalAmount = calculatePhotoPricing(items.map((item) => item.unitPrice)).total
-  const eventId = photos[0].eventId
+  const eventIds = new Set(photos.map((photo) => photo.eventId))
+  // Keep the convenient order-level event relation when every photo is from
+  // the same gallery. Mixed-gallery orders are represented by their items,
+  // each of which retains its own photo/event relation.
+  const eventId = eventIds.size === 1 ? photos[0].eventId : null
 
   for (let attempt = 0; attempt < 5; attempt++) {
     const orderNumber = await generateOrderNumber()

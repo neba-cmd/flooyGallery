@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db"
 import { PhotoUploader } from "@/components/admin/photo-uploader"
 import { PhotoManager } from "@/components/admin/photo-manager"
+import { resolveStoredPreviewUrl } from "@/lib/storage/r2"
 
 export default async function PhotosPage() {
   const [events, photos, photographers] = await Promise.all([
@@ -10,6 +11,6 @@ export default async function PhotosPage() {
   ])
   return <div className="space-y-8"><div><h1 className="text-2xl font-semibold">Photos</h1><p className="text-sm text-muted-foreground">Originals stay private; customer previews are compressed and watermarked in your browser.</p></div>
     {events.length ? <PhotoUploader events={events} photographers={photographers.flatMap(p=>p.photographer?[p.photographer]:[])} /> : <p className="rounded-xl border p-8 text-center text-muted-foreground">Create an event before uploading photos.</p>}
-    <div><h2 className="mb-4 font-semibold">Manage uploads</h2><PhotoManager photos={photos.map(photo=>({id:photo.id,filename:photo.filename,previewUrl:photo.previewUrl,photographer:photo.photographer,event:photo.event,ordered:photo._count.orderItems>0}))} /></div>
+    <div><h2 className="mb-4 font-semibold">Manage uploads</h2><PhotoManager photos={photos.map(photo=>({id:photo.id,filename:photo.filename,previewUrl:resolveStoredPreviewUrl(photo.previewKey,photo.previewUrl),photographer:photo.photographer,event:photo.event,ordered:photo._count.orderItems>0}))} /></div>
   </div>
 }

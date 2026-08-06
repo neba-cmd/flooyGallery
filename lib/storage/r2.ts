@@ -55,9 +55,25 @@ export function originalKey(eventId: string, filename: string): string {
  * from the CDN. Otherwise we fall back to the app's caching proxy route.
  */
 export function resolvePreviewUrl(key: string): string {
-  // The application uses a single private bucket. Proxying only preview keys
-  // prevents a public bucket/domain from exposing originals.
+  if (r2Env.publicUrl) {
+    const base = r2Env.publicUrl.replace(/\/+$/, "")
+    const encodedKey = key.split("/").map(encodeURIComponent).join("/")
+    return `${base}/${encodedKey}`
+  }
   return `/api/preview/${key}`
+}
+
+/** Re-resolve legacy proxy URLs without requiring a database migration. */
+export function resolveStoredPreviewUrl(key: string, storedUrl: string): string {
+  let pathname = storedUrl
+  if (/^https?:\/\//i.test(storedUrl)) {
+    try {
+      pathname = new URL(storedUrl).pathname
+    } catch {
+      return storedUrl
+    }
+  }
+  return pathname.startsWith("/api/preview/") ? resolvePreviewUrl(key) : storedUrl
 }
 
 // ---- Presigned URLs ---------------------------------------------------------
@@ -67,11 +83,13 @@ export async function createUploadUrl(
   key: string,
   contentType: string,
   expiresInSeconds = 600,
+  cacheControl?: string,
 ): Promise<string> {
   const command = new PutObjectCommand({
     Bucket: r2Env.bucket,
     Key: key,
     ContentType: contentType,
+    CacheControl: cacheControl,
   })
   return getSignedUrl(client(), command, { expiresIn: expiresInSeconds })
 }

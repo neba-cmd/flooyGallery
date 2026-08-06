@@ -5,6 +5,8 @@ import { hasAdminSession } from "@/lib/session"
 import { prisma } from "@/lib/db"
 import { createUploadUrl, originalKey, previewKey } from "@/lib/storage/r2"
 
+const PREVIEW_CACHE_CONTROL = "public, max-age=31536000, immutable"
+
 const schema = z.object({
   eventId: z.string().cuid(),
   filename: z.string().trim().min(1).max(240),
@@ -27,9 +29,15 @@ export async function POST(request: Request) {
   try {
     const [originalUrl, previewUrl] = await Promise.all([
       createUploadUrl(original, parsed.data.contentType),
-      createUploadUrl(preview, parsed.data.previewContentType),
+      createUploadUrl(preview, parsed.data.previewContentType, 600, PREVIEW_CACHE_CONTROL),
     ])
-    return NextResponse.json({ originalUrl, previewUrl, originalKey: original, previewKey: preview })
+    return NextResponse.json({
+      originalUrl,
+      previewUrl,
+      originalKey: original,
+      previewKey: preview,
+      previewCacheControl: PREVIEW_CACHE_CONTROL,
+    })
   } catch {
     return NextResponse.json({ error: "Object storage is unavailable or not configured" }, { status: 503 })
   }
