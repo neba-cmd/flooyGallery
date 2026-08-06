@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import type { OrderStatus } from "@/types"
 
 const actions: Record<OrderStatus, Array<{ status: OrderStatus; label: string; destructive?: boolean }>> = {
-  PENDING_PAYMENT: [{ status: "CANCELLED", label: "Cancel", destructive: true }],
+  PENDING_PAYMENT: [{ status: "PAID", label: "Mark paid" }, { status: "CANCELLED", label: "Cancel", destructive: true }],
   PAID: [{ status: "COMPLETED", label: "Complete" }, { status: "REFUNDED", label: "Refund", destructive: true }],
   FAILED: [],
   EXPIRED: [],

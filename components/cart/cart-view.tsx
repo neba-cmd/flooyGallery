@@ -105,8 +105,8 @@ export function CartView() {
             <ArrowRight className="size-4" />
           </Button>
           <p className="mt-4 text-center text-xs leading-relaxed text-muted-foreground">
-            No payment is taken online. You&apos;ll receive an order number to pay at the Flooy Photo
-            Desk.
+            No payment is taken online. Create an order number, then call +44 7403 302773 or
+            +44 7554 040886 to arrange cash payment.
           </p>
         </div>
       </aside>

@@ -3,7 +3,7 @@ import { CheckoutView } from "@/components/checkout/checkout-view"
 
 export const metadata: Metadata = {
   title: "Checkout",
-  description: "Confirm your details to generate an order number. Pay at the Flooy Photo Desk.",
+  description: "Create your photo order, then contact our team to pay in cash.",
 }
 
 export default async function CheckoutPage({

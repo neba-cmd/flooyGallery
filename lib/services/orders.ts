@@ -173,9 +173,7 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus): P
   const current = await prisma.order.findUnique({ where: { id: orderId }, select: { status: true } })
   if (!current) throw new Error("Order not found")
   const allowed: Record<OrderStatus, OrderStatus[]> = {
-    // Online orders can become PAID only through verified Stripe state in the
-    // payment service, never through a generic/admin status mutation.
-    PENDING_PAYMENT: ["FAILED", "EXPIRED", "CANCELLED"],
+    PENDING_PAYMENT: ["PAID", "FAILED", "EXPIRED", "CANCELLED"],
     PAID: ["COMPLETED", "REFUNDED"],
     FAILED: ["PENDING_PAYMENT"],
     EXPIRED: ["PENDING_PAYMENT"],

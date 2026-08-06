@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { toast } from "sonner"
-import { Download, Loader2, CreditCard, Copy, Check } from "lucide-react"
+import { Download, Loader2, Banknote, Copy, Check } from "lucide-react"
 import type { PublicOrderDTO } from "@/types"
 import { Button } from "@/components/ui/button"
 import { formatPrice, formatDateTime } from "@/lib/format"
@@ -93,12 +93,15 @@ export function OrderStatusView({ order }: { order: PublicOrderDTO }) {
 
         {order.status === "PENDING_PAYMENT" && (
           <div className="mt-6 flex items-start gap-3 rounded-2xl bg-accent p-4">
-            <CreditCard className="mt-0.5 size-5 shrink-0 text-primary" />
+            <Banknote className="mt-0.5 size-5 shrink-0 text-primary" />
             <div className="text-sm">
-              <p className="font-medium text-accent-foreground">Waiting for Stripe confirmation</p>
+              <p className="font-medium text-accent-foreground">Pay in cash to complete your order</p>
               <p className="mt-1 text-muted-foreground">
-                Order <span className="font-mono font-medium">{order.orderNumber}</span> remains locked
-                until the server verifies the payment directly with Stripe.
+                Contact us with order <span className="font-mono font-medium">{order.orderNumber}</span> on{" "}
+                <a className="font-medium text-foreground underline" href="tel:+447403302773">+44 7403 302773</a>
+                {" "}or{" "}
+                <a className="font-medium text-foreground underline" href="tel:+447554040886">+44 7554 040886</a>.
+                Once cash payment is confirmed, your downloads unlock on this page.
               </p>
             </div>
           </div>
