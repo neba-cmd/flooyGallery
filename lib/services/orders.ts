@@ -251,6 +251,19 @@ export async function getSignedDownloadUrl(orderNumber: string, itemId: string):
 }
 
 export async function getSignedDownloadUrls(orderNumber: string) {
+  const files = await getDownloadFiles(orderNumber)
+
+  return Promise.all(
+    files.map(async (file) => ({
+      itemId: file.itemId,
+      filename: file.filename,
+      url: await createDownloadUrl(file.originalKey, file.filename, DOWNLOAD_TTL_SECONDS),
+    })),
+  )
+}
+
+/** Resolve paid order files for trusted server-side download handlers. */
+export async function getDownloadFiles(orderNumber: string) {
   const order = await prisma.order.findUnique({
     where: { orderNumber: orderNumber.trim().toUpperCase() },
     select: {
@@ -278,11 +291,7 @@ export async function getSignedDownloadUrls(orderNumber: string) {
       return {
         itemId: item.id,
         filename: item.photo.filename,
-        url: await createDownloadUrl(
-          item.photo.originalKey,
-          item.photo.filename,
-          DOWNLOAD_TTL_SECONDS,
-        ),
+        originalKey: item.photo.originalKey,
       }
     }),
   )

@@ -40,26 +40,14 @@ export function OrderStatusView({ order }: { order: PublicOrderDTO }) {
 
   async function handleDownloadAll() {
     setDownloadingAll(true)
-    try {
-      const res = await fetch(`/api/orders/${order.orderNumber}/download`)
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? "Could not generate download links")
-      const downloads = data.downloads as Array<{ filename: string; url: string }>
-      for (const download of downloads) {
-        const a = document.createElement("a")
-        a.href = download.url
-        a.download = download.filename
-        a.rel = "noopener"
-        document.body.appendChild(a)
-        a.click()
-        a.remove()
-      }
-      toast.success(`${downloads.length} ${downloads.length === 1 ? "photo" : "photos"} downloading`)
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Download failed")
-    } finally {
-      setDownloadingAll(false)
-    }
+    const a = document.createElement("a")
+    a.href = `/api/orders/${encodeURIComponent(order.orderNumber)}/download`
+    a.download = `${order.orderNumber}-photos.zip`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    toast.success("Your ZIP download is starting")
+    window.setTimeout(() => setDownloadingAll(false), 1500)
   }
 
   function copyNumber() {
