@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server"
 import { prisma } from "@/lib/db"
 import { clientKey, rateLimit } from "@/lib/rate-limit"
 import { orderAccessCookieName, verifyOrderAccessToken } from "@/lib/order-access"
-import { verifyAndSyncSumUpCheckout } from "@/lib/services/payments"
+import { verifyAndSyncStripeCheckout } from "@/lib/services/payments"
 
 export async function GET(
   request: NextRequest,
@@ -18,12 +18,12 @@ export async function GET(
   }
   const order = await prisma.order.findUnique({
     where: { orderNumber: normalized },
-    select: { id: true, status: true, sumupCheckoutId: true },
+    select: { id: true, status: true, stripeSessionId: true },
   })
   if (!order) return NextResponse.json({ error: "Order not found" }, { status: 404 })
   try {
-    const synced = order.sumupCheckoutId && !["PAID", "COMPLETED", "REFUNDED"].includes(order.status)
-      ? await verifyAndSyncSumUpCheckout(order.sumupCheckoutId)
+    const synced = order.stripeSessionId && !["PAID", "COMPLETED", "REFUNDED"].includes(order.status)
+      ? await verifyAndSyncStripeCheckout(order.stripeSessionId)
       : order
     return NextResponse.json({ status: synced?.status ?? order.status })
   } catch (error) {

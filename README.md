@@ -72,38 +72,40 @@ R2 presigned upload URLs are issued only to authenticated admins. Browser-side
 processing creates compressed, visibly watermarked previews; short-lived
 presigned GET URLs for originals are issued only for paid/completed order items.
 
-## SumUp Hosted Checkout
+## Stripe Checkout
 
-Checkout prices are calculated from PostgreSQL before a pending order and SumUp Hosted Checkout
-are created. `SUMUP_API_KEY` is only read by server modules. Both the notification handler and the
-customer return page retrieve the checkout directly from SumUp; neither trusts a webhook body or
-redirect query parameters as proof of payment.
+Checkout prices are calculated from PostgreSQL before a pending order and Stripe Checkout Session
+are created. `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` are read only by server modules. Both
+the signed webhook handler and the customer return page retrieve the session directly from Stripe;
+neither trusts redirect query parameters as proof of payment.
 
 Configure these variables locally and in Vercel:
 
 ```bash
-SUMUP_API_KEY="your-server-side-api-key"
-SUMUP_MERCHANT_CODE="your-merchant-code"
-NEXT_PUBLIC_APP_URL="https://your-production-domain.example"
+STRIPE_SECRET_KEY="sk_live_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."
+NEXT_PUBLIC_APP_URL="https://gallery.flooystudio.com"
 ```
 
-Create a SumUp API key for the configured merchant with the `payments` scope (or
-`checkouts.write` and `checkouts.read`) and enable Hosted Checkout for the account. The application
-provides these URLs on every checkout; they must be publicly reachable over HTTPS:
+Create a Stripe webhook endpoint that is publicly reachable over HTTPS:
 
-- Notification (`return_url`): `https://your-production-domain.example/api/webhooks/sumup`
-- Customer return (`redirect_url`): `https://your-production-domain.example/payment-complete`
+- Webhook: `https://gallery.flooystudio.com/api/webhooks/stripe`
+- Customer return: `https://gallery.flooystudio.com/payment-complete`
 
-If SumUp asks for allowlisted callback/redirect URLs, enter those exact URLs. Notifications use the
-`CHECKOUT_STATUS_CHANGED` event. The endpoint returns an empty 2xx response and safely handles
-SumUp retries.
+Subscribe the webhook to `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
+`checkout.session.async_payment_failed`, `checkout.session.expired`, and `charge.refunded`. Copy its
+signing secret into `STRIPE_WEBHOOK_SECRET`. Stripe CLI can forward local events with
+`stripe listen --forward-to localhost:3000/api/webhooks/stripe`.
 
-Apply the additive migration before deploying the application code:
+Apply the provider migration before deploying the application code. Existing order history is
+preserved, but any still-pending SumUp checkout must be started again in Stripe:
 
 ```bash
 npm run db:migrate
 ```
 
-In SumUp's sandbox, test a successful payment, the documented failure amount, an expired session,
+
+
+In Stripe test mode, test a successful payment, a declined card, an expired session,
 and duplicate notification delivery. Refund initiation is not included; when a refund is processed
-in SumUp, the local order must also be changed to `REFUNDED` to disable downloads.
+in Stripe, the signed refund webhook changes the local order to `REFUNDED` to disable downloads.

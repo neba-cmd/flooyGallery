@@ -82,16 +82,17 @@ model Photo {
 }
 
 model Order {
-  id                String  @id @default(cuid())
-  orderNumber       String  @unique // e.g. FLOOY-48372
-  checkoutKey       String? @unique // client-generated idempotency key
-  sumupCheckoutId   String? @unique
-  sumupCheckoutUrl  String?
-  checkoutReference String? @unique
-  eventId           String?
-  event             Event?  @relation(fields: [eventId], references: [id], onDelete: SetNull)
-  productType       String  @default("PHOTOS")
-  currency          String  @default("EUR")
+  id                    String  @id @default(cuid())
+  orderNumber           String  @unique // e.g. FLOOY-48372
+  checkoutKey           String? @unique // client-generated idempotency key
+  stripeSessionId       String? @unique
+  stripeCheckoutUrl     String?
+  stripePaymentIntentId String? @unique
+  checkoutReference     String? @unique
+  eventId               String?
+  event                 Event?  @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  productType           String  @default("PHOTOS")
+  currency              String  @default("EUR")
 
   customerName  String
   customerEmail String?

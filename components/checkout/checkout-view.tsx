@@ -86,7 +86,7 @@ export function CheckoutView({ productType }: { productType: "PHOTOS" | "TEAM_PA
     <div>
       <h1 className="text-2xl font-semibold tracking-tight">Checkout</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Confirm your details below, then continue to SumUp&apos;s secure payment page.
+        Confirm your details below, then continue to Stripe&apos;s secure payment page.
       </p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_18rem]">
@@ -124,11 +124,11 @@ export function CheckoutView({ productType }: { productType: "PHOTOS" | "TEAM_PA
                 Opening secure payment...
               </>
             ) : (
-              "Pay securely with SumUp"
+              "Pay securely with Stripe"
             )}
           </Button>
           <p className="mt-4 text-center text-xs leading-relaxed text-muted-foreground">
-            Prices are verified by the server. Downloads unlock only after SumUp confirms payment.
+            Prices are verified by the server. Downloads unlock only after Stripe confirms payment.
           </p>
         </form>
 

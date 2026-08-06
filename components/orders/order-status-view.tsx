@@ -107,10 +107,10 @@ export function OrderStatusView({ order }: { order: PublicOrderDTO }) {
           <div className="mt-6 flex items-start gap-3 rounded-2xl bg-accent p-4">
             <CreditCard className="mt-0.5 size-5 shrink-0 text-primary" />
             <div className="text-sm">
-              <p className="font-medium text-accent-foreground">Waiting for SumUp confirmation</p>
+              <p className="font-medium text-accent-foreground">Waiting for Stripe confirmation</p>
               <p className="mt-1 text-muted-foreground">
                 Order <span className="font-mono font-medium">{order.orderNumber}</span> remains locked
-                until the server verifies the payment directly with SumUp.
+                until the server verifies the payment directly with Stripe.
               </p>
             </div>
           </div>

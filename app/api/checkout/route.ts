@@ -11,7 +11,7 @@ import { toPublicOrder } from "@/lib/serialize"
 import { randomUUID } from "node:crypto"
 import { prisma } from "@/lib/db"
 import { env } from "@/lib/env"
-import { createSumUpCheckout, listSumUpCheckouts, retrieveSumUpCheckout } from "@/lib/sumup"
+import { createStripeCheckout, retrieveStripeCheckout } from "@/lib/stripe"
 
 const customerFields = {
   name: z.string().trim().min(2, "Please enter your name").max(120),
@@ -71,41 +71,35 @@ export async function POST(req: NextRequest) {
     })
     const stored = await prisma.order.findUniqueOrThrow({ where: { id: order.id } })
     let checkout
-    if (stored.sumupCheckoutId) {
-      checkout = await retrieveSumUpCheckout(stored.sumupCheckoutId)
+    if (stored.stripeSessionId) {
+      checkout = await retrieveStripeCheckout(stored.stripeSessionId)
     } else {
       const accessToken = createOrderAccessToken(order.orderNumber)
       const redirect = new URL("/payment-complete", env.appUrl)
       redirect.searchParams.set("order", order.orderNumber)
       redirect.searchParams.set("access", accessToken)
-      try {
-        checkout = await createSumUpCheckout({
-          amountPence: order.totalAmount,
-          currency: order.currency,
-          reference: stored.checkoutReference!,
-          description: `Flooy Photos ${order.orderNumber}`,
-          redirectUrl: redirect.toString(),
-          webhookUrl: new URL("/api/webhooks/sumup", env.appUrl).toString(),
-        })
-      } catch (error) {
-        // A concurrent retry can create the unique reference first. Resolve it
-        // rather than opening a second payment session.
-        const matches = await listSumUpCheckouts(stored.checkoutReference!).catch(() => [])
-        checkout = matches.find((item) => item.checkout_reference === stored.checkoutReference)
-        if (!checkout) throw error
-      }
-      if (!checkout.hosted_checkout_url) throw new Error("SumUp did not return a hosted checkout URL")
+      checkout = await createStripeCheckout({
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        amountMinor: order.totalAmount,
+        currency: order.currency,
+        customerEmail: order.customerEmail ?? undefined,
+        successUrl: redirect.toString(),
+        cancelUrl: new URL("/checkout", env.appUrl).toString(),
+        idempotencyKey: stored.checkoutReference!,
+      })
+      if (!checkout.url) throw new Error("Stripe did not return a hosted checkout URL")
       const claimed = await prisma.order.updateMany({
-        where: { id: order.id, sumupCheckoutId: null },
-        data: { sumupCheckoutId: checkout.id, sumupCheckoutUrl: checkout.hosted_checkout_url },
+        where: { id: order.id, stripeSessionId: null },
+        data: { stripeSessionId: checkout.id, stripeCheckoutUrl: checkout.url },
       })
       if (claimed.count === 0) {
         const winner = await prisma.order.findUniqueOrThrow({ where: { id: order.id } })
-        checkout = await retrieveSumUpCheckout(winner.sumupCheckoutId!)
+        checkout = await retrieveStripeCheckout(winner.stripeSessionId!)
       }
     }
-    const hostedCheckoutUrl = checkout.hosted_checkout_url ?? stored.sumupCheckoutUrl
-    if (!hostedCheckoutUrl) throw new Error("SumUp did not return a hosted checkout URL")
+    const hostedCheckoutUrl = checkout.url ?? stored.stripeCheckoutUrl
+    if (!hostedCheckoutUrl) throw new Error("Stripe did not return a hosted checkout URL")
     const response = NextResponse.json({ order: toPublicOrder(order), hostedCheckoutUrl }, { status: 201 })
     response.cookies.set(
       orderAccessCookieName(order.orderNumber),
@@ -125,7 +119,7 @@ export async function POST(req: NextRequest) {
     if (message === "Checkout is temporarily unavailable") {
       // Keep provider credentials and response bodies out of logs, while
       // retaining enough context to diagnose configuration/API failures.
-      console.error("[checkout] Order or SumUp checkout creation failed", {
+      console.error("[checkout] Order or Stripe checkout creation failed", {
         error: err instanceof Error ? err.message : "Unknown error",
       })
     }

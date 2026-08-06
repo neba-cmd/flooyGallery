@@ -4197,8 +4197,9 @@ export namespace Prisma {
     id: string | null
     orderNumber: string | null
     checkoutKey: string | null
-    sumupCheckoutId: string | null
-    sumupCheckoutUrl: string | null
+    stripeSessionId: string | null
+    stripeCheckoutUrl: string | null
+    stripePaymentIntentId: string | null
     checkoutReference: string | null
     eventId: string | null
     productType: string | null
@@ -4221,8 +4222,9 @@ export namespace Prisma {
     id: string | null
     orderNumber: string | null
     checkoutKey: string | null
-    sumupCheckoutId: string | null
-    sumupCheckoutUrl: string | null
+    stripeSessionId: string | null
+    stripeCheckoutUrl: string | null
+    stripePaymentIntentId: string | null
     checkoutReference: string | null
     eventId: string | null
     productType: string | null
@@ -4245,8 +4247,9 @@ export namespace Prisma {
     id: number
     orderNumber: number
     checkoutKey: number
-    sumupCheckoutId: number
-    sumupCheckoutUrl: number
+    stripeSessionId: number
+    stripeCheckoutUrl: number
+    stripePaymentIntentId: number
     checkoutReference: number
     eventId: number
     productType: number
@@ -4279,8 +4282,9 @@ export namespace Prisma {
     id?: true
     orderNumber?: true
     checkoutKey?: true
-    sumupCheckoutId?: true
-    sumupCheckoutUrl?: true
+    stripeSessionId?: true
+    stripeCheckoutUrl?: true
+    stripePaymentIntentId?: true
     checkoutReference?: true
     eventId?: true
     productType?: true
@@ -4303,8 +4307,9 @@ export namespace Prisma {
     id?: true
     orderNumber?: true
     checkoutKey?: true
-    sumupCheckoutId?: true
-    sumupCheckoutUrl?: true
+    stripeSessionId?: true
+    stripeCheckoutUrl?: true
+    stripePaymentIntentId?: true
     checkoutReference?: true
     eventId?: true
     productType?: true
@@ -4327,8 +4332,9 @@ export namespace Prisma {
     id?: true
     orderNumber?: true
     checkoutKey?: true
-    sumupCheckoutId?: true
-    sumupCheckoutUrl?: true
+    stripeSessionId?: true
+    stripeCheckoutUrl?: true
+    stripePaymentIntentId?: true
     checkoutReference?: true
     eventId?: true
     productType?: true
@@ -4438,8 +4444,9 @@ export namespace Prisma {
     id: string
     orderNumber: string
     checkoutKey: string | null
-    sumupCheckoutId: string | null
-    sumupCheckoutUrl: string | null
+    stripeSessionId: string | null
+    stripeCheckoutUrl: string | null
+    stripePaymentIntentId: string | null
     checkoutReference: string | null
     eventId: string | null
     productType: string
@@ -4481,8 +4488,9 @@ export namespace Prisma {
     id?: boolean
     orderNumber?: boolean
     checkoutKey?: boolean
-    sumupCheckoutId?: boolean
-    sumupCheckoutUrl?: boolean
+    stripeSessionId?: boolean
+    stripeCheckoutUrl?: boolean
+    stripePaymentIntentId?: boolean
     checkoutReference?: boolean
     eventId?: boolean
     productType?: boolean
@@ -4508,8 +4516,9 @@ export namespace Prisma {
     id?: boolean
     orderNumber?: boolean
     checkoutKey?: boolean
-    sumupCheckoutId?: boolean
-    sumupCheckoutUrl?: boolean
+    stripeSessionId?: boolean
+    stripeCheckoutUrl?: boolean
+    stripePaymentIntentId?: boolean
     checkoutReference?: boolean
     eventId?: boolean
     productType?: boolean
@@ -4533,8 +4542,9 @@ export namespace Prisma {
     id?: boolean
     orderNumber?: boolean
     checkoutKey?: boolean
-    sumupCheckoutId?: boolean
-    sumupCheckoutUrl?: boolean
+    stripeSessionId?: boolean
+    stripeCheckoutUrl?: boolean
+    stripePaymentIntentId?: boolean
     checkoutReference?: boolean
     eventId?: boolean
     productType?: boolean
@@ -4558,8 +4568,9 @@ export namespace Prisma {
     id?: boolean
     orderNumber?: boolean
     checkoutKey?: boolean
-    sumupCheckoutId?: boolean
-    sumupCheckoutUrl?: boolean
+    stripeSessionId?: boolean
+    stripeCheckoutUrl?: boolean
+    stripePaymentIntentId?: boolean
     checkoutReference?: boolean
     eventId?: boolean
     productType?: boolean
@@ -4578,7 +4589,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderNumber" | "checkoutKey" | "sumupCheckoutId" | "sumupCheckoutUrl" | "checkoutReference" | "eventId" | "productType" | "currency" | "customerName" | "customerEmail" | "customerPhone" | "status" | "totalAmount" | "paidAt" | "paymentVerifiedAt" | "completedAt" | "refundedAt" | "cancelledAt" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
+  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderNumber" | "checkoutKey" | "stripeSessionId" | "stripeCheckoutUrl" | "stripePaymentIntentId" | "checkoutReference" | "eventId" | "productType" | "currency" | "customerName" | "customerEmail" | "customerPhone" | "status" | "totalAmount" | "paidAt" | "paymentVerifiedAt" | "completedAt" | "refundedAt" | "cancelledAt" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
   export type OrderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     event?: boolean | Order$eventArgs<ExtArgs>
     items?: boolean | Order$itemsArgs<ExtArgs>
@@ -4601,8 +4612,9 @@ export namespace Prisma {
       id: string
       orderNumber: string
       checkoutKey: string | null
-      sumupCheckoutId: string | null
-      sumupCheckoutUrl: string | null
+      stripeSessionId: string | null
+      stripeCheckoutUrl: string | null
+      stripePaymentIntentId: string | null
       checkoutReference: string | null
       eventId: string | null
       productType: string
@@ -5047,8 +5059,9 @@ export namespace Prisma {
     readonly id: FieldRef<"Order", 'String'>
     readonly orderNumber: FieldRef<"Order", 'String'>
     readonly checkoutKey: FieldRef<"Order", 'String'>
-    readonly sumupCheckoutId: FieldRef<"Order", 'String'>
-    readonly sumupCheckoutUrl: FieldRef<"Order", 'String'>
+    readonly stripeSessionId: FieldRef<"Order", 'String'>
+    readonly stripeCheckoutUrl: FieldRef<"Order", 'String'>
+    readonly stripePaymentIntentId: FieldRef<"Order", 'String'>
     readonly checkoutReference: FieldRef<"Order", 'String'>
     readonly eventId: FieldRef<"Order", 'String'>
     readonly productType: FieldRef<"Order", 'String'>
@@ -11111,8 +11124,9 @@ export namespace Prisma {
     id: 'id',
     orderNumber: 'orderNumber',
     checkoutKey: 'checkoutKey',
-    sumupCheckoutId: 'sumupCheckoutId',
-    sumupCheckoutUrl: 'sumupCheckoutUrl',
+    stripeSessionId: 'stripeSessionId',
+    stripeCheckoutUrl: 'stripeCheckoutUrl',
+    stripePaymentIntentId: 'stripePaymentIntentId',
     checkoutReference: 'checkoutReference',
     eventId: 'eventId',
     productType: 'productType',
@@ -11516,8 +11530,9 @@ export namespace Prisma {
     id?: StringFilter<"Order"> | string
     orderNumber?: StringFilter<"Order"> | string
     checkoutKey?: StringNullableFilter<"Order"> | string | null
-    sumupCheckoutId?: StringNullableFilter<"Order"> | string | null
-    sumupCheckoutUrl?: StringNullableFilter<"Order"> | string | null
+    stripeSessionId?: StringNullableFilter<"Order"> | string | null
+    stripeCheckoutUrl?: StringNullableFilter<"Order"> | string | null
+    stripePaymentIntentId?: StringNullableFilter<"Order"> | string | null
     checkoutReference?: StringNullableFilter<"Order"> | string | null
     eventId?: StringNullableFilter<"Order"> | string | null
     productType?: StringFilter<"Order"> | string
@@ -11542,8 +11557,9 @@ export namespace Prisma {
     id?: SortOrder
     orderNumber?: SortOrder
     checkoutKey?: SortOrderInput | SortOrder
-    sumupCheckoutId?: SortOrderInput | SortOrder
-    sumupCheckoutUrl?: SortOrderInput | SortOrder
+    stripeSessionId?: SortOrderInput | SortOrder
+    stripeCheckoutUrl?: SortOrderInput | SortOrder
+    stripePaymentIntentId?: SortOrderInput | SortOrder
     checkoutReference?: SortOrderInput | SortOrder
     eventId?: SortOrderInput | SortOrder
     productType?: SortOrder
@@ -11568,12 +11584,13 @@ export namespace Prisma {
     id?: string
     orderNumber?: string
     checkoutKey?: string
-    sumupCheckoutId?: string
+    stripeSessionId?: string
+    stripePaymentIntentId?: string
     checkoutReference?: string
     AND?: OrderWhereInput | OrderWhereInput[]
     OR?: OrderWhereInput[]
     NOT?: OrderWhereInput | OrderWhereInput[]
-    sumupCheckoutUrl?: StringNullableFilter<"Order"> | string | null
+    stripeCheckoutUrl?: StringNullableFilter<"Order"> | string | null
     eventId?: StringNullableFilter<"Order"> | string | null
     productType?: StringFilter<"Order"> | string
     currency?: StringFilter<"Order"> | string
@@ -11591,14 +11608,15 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Order"> | Date | string
     event?: XOR<EventNullableScalarRelationFilter, EventWhereInput> | null
     items?: OrderItemListRelationFilter
-  }, "id" | "orderNumber" | "checkoutKey" | "sumupCheckoutId" | "checkoutReference">
+  }, "id" | "orderNumber" | "checkoutKey" | "stripeSessionId" | "stripePaymentIntentId" | "checkoutReference">
 
   export type OrderOrderByWithAggregationInput = {
     id?: SortOrder
     orderNumber?: SortOrder
     checkoutKey?: SortOrderInput | SortOrder
-    sumupCheckoutId?: SortOrderInput | SortOrder
-    sumupCheckoutUrl?: SortOrderInput | SortOrder
+    stripeSessionId?: SortOrderInput | SortOrder
+    stripeCheckoutUrl?: SortOrderInput | SortOrder
+    stripePaymentIntentId?: SortOrderInput | SortOrder
     checkoutReference?: SortOrderInput | SortOrder
     eventId?: SortOrderInput | SortOrder
     productType?: SortOrder
@@ -11629,8 +11647,9 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Order"> | string
     orderNumber?: StringWithAggregatesFilter<"Order"> | string
     checkoutKey?: StringNullableWithAggregatesFilter<"Order"> | string | null
-    sumupCheckoutId?: StringNullableWithAggregatesFilter<"Order"> | string | null
-    sumupCheckoutUrl?: StringNullableWithAggregatesFilter<"Order"> | string | null
+    stripeSessionId?: StringNullableWithAggregatesFilter<"Order"> | string | null
+    stripeCheckoutUrl?: StringNullableWithAggregatesFilter<"Order"> | string | null
+    stripePaymentIntentId?: StringNullableWithAggregatesFilter<"Order"> | string | null
     checkoutReference?: StringNullableWithAggregatesFilter<"Order"> | string | null
     eventId?: StringNullableWithAggregatesFilter<"Order"> | string | null
     productType?: StringWithAggregatesFilter<"Order"> | string
@@ -12238,8 +12257,9 @@ export namespace Prisma {
     id?: string
     orderNumber: string
     checkoutKey?: string | null
-    sumupCheckoutId?: string | null
-    sumupCheckoutUrl?: string | null
+    stripeSessionId?: string | null
+    stripeCheckoutUrl?: string | null
+    stripePaymentIntentId?: string | null
     checkoutReference?: string | null
     productType?: string
     currency?: string
@@ -12263,8 +12283,9 @@ export namespace Prisma {
     id?: string
     orderNumber: string
     checkoutKey?: string | null
-    sumupCheckoutId?: string | null
-    sumupCheckoutUrl?: string | null
+    stripeSessionId?: string | null
+    stripeCheckoutUrl?: string | null
+    stripePaymentIntentId?: string | null
     checkoutReference?: string | null
     eventId?: string | null
     productType?: string
@@ -12288,8 +12309,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     orderNumber?: StringFieldUpdateOperationsInput | string
     checkoutKey?: NullableStringFieldUpdateOperationsInput | string | null
-    sumupCheckoutId?: NullableStringFieldUpdateOperationsInput | string | null
-    sumupCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutReference?: NullableStringFieldUpdateOperationsInput | string | null
     productType?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
@@ -12313,8 +12335,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     orderNumber?: StringFieldUpdateOperationsInput | string
     checkoutKey?: NullableStringFieldUpdateOperationsInput | string | null
-    sumupCheckoutId?: NullableStringFieldUpdateOperationsInput | string | null
-    sumupCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutReference?: NullableStringFieldUpdateOperationsInput | string | null
     eventId?: NullableStringFieldUpdateOperationsInput | string | null
     productType?: StringFieldUpdateOperationsInput | string
@@ -12338,8 +12361,9 @@ export namespace Prisma {
     id?: string
     orderNumber: string
     checkoutKey?: string | null
-    sumupCheckoutId?: string | null
-    sumupCheckoutUrl?: string | null
+    stripeSessionId?: string | null
+    stripeCheckoutUrl?: string | null
+    stripePaymentIntentId?: string | null
     checkoutReference?: string | null
     eventId?: string | null
     productType?: string
@@ -12362,8 +12386,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     orderNumber?: StringFieldUpdateOperationsInput | string
     checkoutKey?: NullableStringFieldUpdateOperationsInput | string | null
-    sumupCheckoutId?: NullableStringFieldUpdateOperationsInput | string | null
-    sumupCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutReference?: NullableStringFieldUpdateOperationsInput | string | null
     productType?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
@@ -12385,8 +12410,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     orderNumber?: StringFieldUpdateOperationsInput | string
     checkoutKey?: NullableStringFieldUpdateOperationsInput | string | null
-    sumupCheckoutId?: NullableStringFieldUpdateOperationsInput | string | null
-    sumupCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutReference?: NullableStringFieldUpdateOperationsInput | string | null
     eventId?: NullableStringFieldUpdateOperationsInput | string | null
     productType?: StringFieldUpdateOperationsInput | string
@@ -13157,8 +13183,9 @@ export namespace Prisma {
     id?: SortOrder
     orderNumber?: SortOrder
     checkoutKey?: SortOrder
-    sumupCheckoutId?: SortOrder
-    sumupCheckoutUrl?: SortOrder
+    stripeSessionId?: SortOrder
+    stripeCheckoutUrl?: SortOrder
+    stripePaymentIntentId?: SortOrder
     checkoutReference?: SortOrder
     eventId?: SortOrder
     productType?: SortOrder
@@ -13185,8 +13212,9 @@ export namespace Prisma {
     id?: SortOrder
     orderNumber?: SortOrder
     checkoutKey?: SortOrder
-    sumupCheckoutId?: SortOrder
-    sumupCheckoutUrl?: SortOrder
+    stripeSessionId?: SortOrder
+    stripeCheckoutUrl?: SortOrder
+    stripePaymentIntentId?: SortOrder
     checkoutReference?: SortOrder
     eventId?: SortOrder
     productType?: SortOrder
@@ -13209,8 +13237,9 @@ export namespace Prisma {
     id?: SortOrder
     orderNumber?: SortOrder
     checkoutKey?: SortOrder
-    sumupCheckoutId?: SortOrder
-    sumupCheckoutUrl?: SortOrder
+    stripeSessionId?: SortOrder
+    stripeCheckoutUrl?: SortOrder
+    stripePaymentIntentId?: SortOrder
     checkoutReference?: SortOrder
     eventId?: SortOrder
     productType?: SortOrder
@@ -14107,8 +14136,9 @@ export namespace Prisma {
     id?: string
     orderNumber: string
     checkoutKey?: string | null
-    sumupCheckoutId?: string | null
-    sumupCheckoutUrl?: string | null
+    stripeSessionId?: string | null
+    stripeCheckoutUrl?: string | null
+    stripePaymentIntentId?: string | null
     checkoutReference?: string | null
     productType?: string
     currency?: string
@@ -14131,8 +14161,9 @@ export namespace Prisma {
     id?: string
     orderNumber: string
     checkoutKey?: string | null
-    sumupCheckoutId?: string | null
-    sumupCheckoutUrl?: string | null
+    stripeSessionId?: string | null
+    stripeCheckoutUrl?: string | null
+    stripePaymentIntentId?: string | null
     checkoutReference?: string | null
     productType?: string
     currency?: string
@@ -14221,8 +14252,9 @@ export namespace Prisma {
     id?: StringFilter<"Order"> | string
     orderNumber?: StringFilter<"Order"> | string
     checkoutKey?: StringNullableFilter<"Order"> | string | null
-    sumupCheckoutId?: StringNullableFilter<"Order"> | string | null
-    sumupCheckoutUrl?: StringNullableFilter<"Order"> | string | null
+    stripeSessionId?: StringNullableFilter<"Order"> | string | null
+    stripeCheckoutUrl?: StringNullableFilter<"Order"> | string | null
+    stripePaymentIntentId?: StringNullableFilter<"Order"> | string | null
     checkoutReference?: StringNullableFilter<"Order"> | string | null
     eventId?: StringNullableFilter<"Order"> | string | null
     productType?: StringFilter<"Order"> | string
@@ -14480,8 +14512,9 @@ export namespace Prisma {
     id?: string
     orderNumber: string
     checkoutKey?: string | null
-    sumupCheckoutId?: string | null
-    sumupCheckoutUrl?: string | null
+    stripeSessionId?: string | null
+    stripeCheckoutUrl?: string | null
+    stripePaymentIntentId?: string | null
     checkoutReference?: string | null
     productType?: string
     currency?: string
@@ -14504,8 +14537,9 @@ export namespace Prisma {
     id?: string
     orderNumber: string
     checkoutKey?: string | null
-    sumupCheckoutId?: string | null
-    sumupCheckoutUrl?: string | null
+    stripeSessionId?: string | null
+    stripeCheckoutUrl?: string | null
+    stripePaymentIntentId?: string | null
     checkoutReference?: string | null
     eventId?: string | null
     productType?: string
@@ -14585,8 +14619,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     orderNumber?: StringFieldUpdateOperationsInput | string
     checkoutKey?: NullableStringFieldUpdateOperationsInput | string | null
-    sumupCheckoutId?: NullableStringFieldUpdateOperationsInput | string | null
-    sumupCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutReference?: NullableStringFieldUpdateOperationsInput | string | null
     productType?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
@@ -14609,8 +14644,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     orderNumber?: StringFieldUpdateOperationsInput | string
     checkoutKey?: NullableStringFieldUpdateOperationsInput | string | null
-    sumupCheckoutId?: NullableStringFieldUpdateOperationsInput | string | null
-    sumupCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutReference?: NullableStringFieldUpdateOperationsInput | string | null
     eventId?: NullableStringFieldUpdateOperationsInput | string | null
     productType?: StringFieldUpdateOperationsInput | string
@@ -14960,8 +14996,9 @@ export namespace Prisma {
     id?: string
     orderNumber: string
     checkoutKey?: string | null
-    sumupCheckoutId?: string | null
-    sumupCheckoutUrl?: string | null
+    stripeSessionId?: string | null
+    stripeCheckoutUrl?: string | null
+    stripePaymentIntentId?: string | null
     checkoutReference?: string | null
     productType?: string
     currency?: string
@@ -15036,8 +15073,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     orderNumber?: StringFieldUpdateOperationsInput | string
     checkoutKey?: NullableStringFieldUpdateOperationsInput | string | null
-    sumupCheckoutId?: NullableStringFieldUpdateOperationsInput | string | null
-    sumupCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutReference?: NullableStringFieldUpdateOperationsInput | string | null
     productType?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
@@ -15060,8 +15098,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     orderNumber?: StringFieldUpdateOperationsInput | string
     checkoutKey?: NullableStringFieldUpdateOperationsInput | string | null
-    sumupCheckoutId?: NullableStringFieldUpdateOperationsInput | string | null
-    sumupCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutReference?: NullableStringFieldUpdateOperationsInput | string | null
     productType?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
@@ -15084,8 +15123,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     orderNumber?: StringFieldUpdateOperationsInput | string
     checkoutKey?: NullableStringFieldUpdateOperationsInput | string | null
-    sumupCheckoutId?: NullableStringFieldUpdateOperationsInput | string | null
-    sumupCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutReference?: NullableStringFieldUpdateOperationsInput | string | null
     productType?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string

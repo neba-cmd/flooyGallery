@@ -12,7 +12,7 @@ type StatusConfig = {
 export const ORDER_STATUS: Record<OrderStatus, StatusConfig> = {
   PENDING_PAYMENT: {
     label: "Pending Payment",
-    description: "Waiting for SumUp to confirm this payment.",
+    description: "Waiting for Stripe to confirm this payment.",
     badgeClass: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
     downloadable: false,
   },

@@ -60,11 +60,11 @@ export const env = {
   get appUrl() {
     return origin(optional("NEXT_PUBLIC_APP_URL") ?? "http://localhost:3000", "NEXT_PUBLIC_APP_URL")
   },
-  get sumupApiKey() {
-    return requiredEnv("SUMUP_API_KEY")
+  get stripeSecretKey() {
+    return requiredEnv("STRIPE_SECRET_KEY")
   },
-  get sumupMerchantCode() {
-    return requiredEnv("SUMUP_MERCHANT_CODE")
+  get stripeWebhookSecret() {
+    return requiredEnv("STRIPE_WEBHOOK_SECRET")
   },
 }
 

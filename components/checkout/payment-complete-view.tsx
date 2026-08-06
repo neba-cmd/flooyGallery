@@ -26,7 +26,7 @@ export function PaymentCompleteView({ orderNumber, accessToken }: { orderNumber:
         setStatus(data.status)
         if (["PAID", "COMPLETED", "REFUNDED", "FAILED", "EXPIRED"].includes(data.status)) return
       } catch {
-        // A transient SumUp/network failure is represented as pending while we retry.
+        // A transient Stripe/network failure is represented as pending while we retry.
       }
       if (!cancelled && attempts < 10) window.setTimeout(check, 3000)
       else if (!cancelled) setFinishedPolling(true)
@@ -48,8 +48,8 @@ export function PaymentCompleteView({ orderNumber, accessToken }: { orderNumber:
       </h1>
       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
         {paid ? "Your purchased originals are unlocked and ready to download."
-          : failed ? "SumUp did not confirm this payment. Your photos remain locked."
-            : "We’re securely confirming the payment with SumUp. This can take a few moments."}
+          : failed ? "Stripe did not confirm this payment. Your photos remain locked."
+            : "We’re securely confirming the payment with Stripe. This can take a few moments."}
       </p>
       <Button className="mt-7 w-full rounded-full" render={<Link href={`/orders/${orderNumber}`} />}>
         {paid ? "View downloads" : "View order"}

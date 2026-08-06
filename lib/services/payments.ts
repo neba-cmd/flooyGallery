@@ -1,56 +1,54 @@
 import "server-only"
+import Stripe from "stripe"
 import { prisma } from "@/lib/db"
-import { env } from "@/lib/env"
-import { retrieveSumUpCheckout } from "@/lib/sumup"
+import { retrieveStripeCheckout } from "@/lib/stripe"
 
-function majorToMinor(amount: number): number | null {
-  const minor = Math.round(amount * 100)
-  return Number.isFinite(amount) && Math.abs(amount * 100 - minor) < 1e-6 ? minor : null
+function paymentIntentId(session: Stripe.Checkout.Session) {
+  return typeof session.payment_intent === "string"
+    ? session.payment_intent
+    : session.payment_intent?.id ?? null
 }
 
-export async function verifyAndSyncSumUpCheckout(checkoutId: string) {
-  const order = await prisma.order.findUnique({ where: { sumupCheckoutId: checkoutId } })
+function isRefunded(session: Stripe.Checkout.Session) {
+  const intent = typeof session.payment_intent === "object" ? session.payment_intent : null
+  const charge = intent && typeof intent.latest_charge === "object" ? intent.latest_charge : null
+  return Boolean(charge && charge.amount_refunded >= (session.amount_total ?? Number.MAX_SAFE_INTEGER))
+}
+
+export async function verifyAndSyncStripeCheckout(sessionId: string, providerEvent?: "FAILED") {
+  const order = await prisma.order.findUnique({ where: { stripeSessionId: sessionId } })
   if (!order) return null
 
-  const checkout = await retrieveSumUpCheckout(checkoutId)
-  const successful = checkout.transactions?.some((transaction) =>
-    transaction.status === "SUCCESSFUL" &&
-    transaction.merchant_code === env.sumupMerchantCode &&
-    transaction.currency === order.currency &&
-    majorToMinor(transaction.amount ?? Number.NaN) === order.totalAmount,
-  ) ?? false
-  const refunded = checkout.transactions?.some((transaction) =>
-    transaction.status === "REFUNDED" &&
-    transaction.merchant_code === env.sumupMerchantCode &&
-    transaction.currency === order.currency &&
-    majorToMinor(transaction.amount ?? Number.NaN) === order.totalAmount,
-  ) ?? false
+  const session = await retrieveStripeCheckout(sessionId)
   const identityMatches =
-    checkout.id === order.sumupCheckoutId &&
-    checkout.checkout_reference === order.checkoutReference &&
-    checkout.merchant_code === env.sumupMerchantCode &&
-    checkout.currency === order.currency &&
-    majorToMinor(checkout.amount) === order.totalAmount
+    session.id === order.stripeSessionId &&
+    session.client_reference_id === order.orderNumber &&
+    session.metadata?.orderId === order.id &&
+    session.currency?.toUpperCase() === order.currency &&
+    session.amount_total === order.totalAmount
 
   if (!identityMatches) {
-    console.error("[sumup] Checkout verification mismatch", { orderId: order.id, checkoutId })
+    console.error("[stripe] Checkout verification mismatch", { orderId: order.id, sessionId })
     throw new Error("Payment verification failed")
   }
 
+  const refunded = isRefunded(session)
   const nextStatus = refunded
     ? "REFUNDED"
-    : checkout.status === "PAID" && successful
-    ? "PAID"
-    : checkout.status === "FAILED" ? "FAILED"
-      : checkout.status === "EXPIRED" ? "EXPIRED" : "PENDING_PAYMENT"
+    : session.payment_status === "paid"
+      ? "PAID"
+      : providerEvent === "FAILED"
+        ? "FAILED"
+        : session.status === "expired"
+          ? "EXPIRED"
+          : "PENDING_PAYMENT"
 
-  // PAID is terminal here: delayed/duplicate notifications cannot relock a
-  // fulfilled order. updateMany makes concurrent webhook/redirect checks safe.
-  if (refunded || (order.status !== "PAID" && order.status !== "COMPLETED" && order.status !== "REFUNDED")) {
+  if (refunded || !["PAID", "COMPLETED", "REFUNDED"].includes(order.status)) {
     await prisma.order.updateMany({
       where: { id: order.id, status: order.status },
       data: {
         status: nextStatus,
+        stripePaymentIntentId: paymentIntentId(session),
         ...(nextStatus === "PAID"
           ? { paidAt: order.paidAt ?? new Date(), paymentVerifiedAt: new Date() }
           : nextStatus === "REFUNDED" ? { refundedAt: order.refundedAt ?? new Date() } : {}),
